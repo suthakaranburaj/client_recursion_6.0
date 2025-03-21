@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Table,
   TableBody,
@@ -9,52 +9,19 @@ import {
   Paper,
   Typography,
   Box,
-  CircularProgress,
 } from '@mui/material';
-import { getAllTransactions } from '../../../services/statementService'; // Import the API service
-import { useAuth } from '../../context/AuthContext'; // Assuming you have an AuthContext for user token
+
+// Dummy transaction data
+const transactions = [
+  { id: 1, date: '2023-10-01', narration: 'Salary', type: 'Cr', amount: 5000, balance: 5000 },
+  { id: 2, date: '2023-10-02', narration: 'Groceries', type: 'Dr', amount: 200, balance: 4800 },
+  { id: 3, date: '2023-10-03', narration: 'Rent', type: 'Dr', amount: 1000, balance: 3800 },
+  { id: 4, date: '2023-10-04', narration: 'Freelance Payment', type: 'Cr', amount: 1500, balance: 5300 },
+  { id: 5, date: '2023-10-05', narration: 'Utilities', type: 'Dr', amount: 150, balance: 5150 },
+  { id: 6, date: '2023-10-06', narration: 'Bonus', type: 'Cr', amount: 1000, balance: 6150 },
+];
 
 function TransactionHistory() {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { token } = useAuth(); // Get the user's token from AuthContext
-
-  // Fetch transactions from the backend
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        // Replace `userStatementId` with the actual statement ID you want to fetch
-        const userStatementId = 1; // You can get this from the user's selected statement
-        const data = await getAllTransactions(userStatementId, token);
-        setTransactions(data);
-      } catch (err) {
-        setError('Failed to fetch transactions. Please try again.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, [token]);
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: 'primary.main' }}>
@@ -85,20 +52,20 @@ function TransactionHistory() {
                 <TableCell
                   align="right"
                   sx={{
-                    color: transaction.type === 'Debit' ? 'red' : 'transparent',
+                    color: transaction.type === 'Dr' ? 'red' : 'transparent',
                     fontWeight: 600,
                   }}
                 >
-                  {transaction.type === 'Debit' ? `₹${transaction.amount}` : ''}
+                  {transaction.type === 'Dr' ? `₹${transaction.amount}` : ''}
                 </TableCell>
                 <TableCell
                   align="right"
                   sx={{
-                    color: transaction.type === 'Credit' ? 'green' : 'transparent',
+                    color: transaction.type === 'Cr' ? 'green' : 'transparent',
                     fontWeight: 600,
                   }}
                 >
-                  {transaction.type === 'Credit' ? `₹${transaction.amount}` : ''}
+                  {transaction.type === 'Cr' ? `₹${transaction.amount}` : ''}
                 </TableCell>
                 <TableCell align="right" sx={{ fontWeight: 600 }}>
                   ₹{transaction.balance}
