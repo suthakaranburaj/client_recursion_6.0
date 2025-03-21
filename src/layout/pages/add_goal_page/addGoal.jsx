@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,9 +8,6 @@ import {
   Grid,
   Paper,
   Typography,
-  Stepper,
-  Step,
-  StepLabel,
   Slider,
   TextField,
   IconButton,
@@ -28,6 +25,7 @@ import {
   Business,
   AddCircle
 } from '@mui/icons-material';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 const ColorButton = styled(Button)(({ theme, color }) => ({
   color: theme.palette.getContrastText(color),
@@ -49,17 +47,53 @@ const goalTemplates = [
   { name: 'Custom Goal', icon: <AddCircle />, color: '#2A363B' }
 ];
 
+const calculateSIP = (monthly, years, rate) => {
+  const months = years * 12;
+  const monthlyRate = rate / 100 / 12;
+  const futureValue = monthly * (
+    ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * 
+    (1 + monthlyRate)
+  );
+  const investedAmount = monthly * months;
+  const totalValue = futureValue || 0;
+  const estimatedReturn = totalValue - investedAmount;
+  
+  return {
+    invested: Math.round(investedAmount),
+    returns: Math.round(estimatedReturn),
+    total: Math.round(totalValue)
+  };
+};
+
 const AddGoal = () => {
   const [open, setOpen] = useState(false);
-  const [activeStep, setActiveStep] = useState(0);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [formData, setFormData] = useState({
     goalName: '',
-    method: '',
     period: 5,
-    goalAmount: '',
-    monthlyIncome: ''
+    interestRate: 8,
+    monthlyInvestment: 5000,
   });
+
+  const [calculations, setCalculations] = useState({
+    invested: 0,
+    returns: 0,
+    total: 0
+  });
+
+  const [chartData, setChartData] = useState([]);
+
+  useEffect(() => {
+    const { monthlyInvestment, period, interestRate } = formData;
+    const results = calculateSIP(monthlyInvestment, period, interestRate);
+    setCalculations(results);
+    
+    // Prepare data for pie chart
+    setChartData([
+      { name: 'Invested', value: results.invested },
+      { name: 'Returns', value: results.returns }
+    ]);
+  }, [formData]);
 
   const handleGoalSelect = (goal) => {
     setSelectedGoal(goal);
@@ -71,12 +105,13 @@ const AddGoal = () => {
 
   const handleClose = () => {
     setOpen(false);
-    setActiveStep(0);
-    setFormData({ goalName: '', method: '', period: 5, goalAmount: '', monthlyIncome: '' });
+    setFormData({ 
+      goalName: '', 
+      period: 5, 
+      interestRate: 8, 
+      monthlyInvestment: 5000 
+    });
   };
-
-  const handleNext = () => setActiveStep((prev) => prev + 1);
-  const handleBack = () => setActiveStep((prev) => prev - 1);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -86,6 +121,8 @@ const AddGoal = () => {
     handleClose();
     alert(`Goal Saved: ${formData.goalName}`);
   };
+
+  const COLORS = ['#0088FE', '#00C49F'];
 
   return (
     <div style={{ padding: '2rem' }}>
@@ -157,190 +194,169 @@ const AddGoal = () => {
         </DialogTitle>
 
         <DialogContent>
-          <Stepper activeStep={activeStep} sx={{ mb: 4, mt: 2 }}>
-            <Step><StepLabel>Method</StepLabel></Step>
-            <Step><StepLabel>Details</StepLabel></Step>
-          </Stepper>
+          <Box sx={{ mt: 3 }}>
+            {selectedGoal?.name === 'Custom Goal' && (
+              <TextField
+                fullWidth
+                label="Goal Name"
+                variant="outlined"
+                name="goalName"
+                value={formData.goalName}
+                onChange={handleChange}
+                sx={{ mb: 3 }}
+                InputProps={{
+                  sx: { borderRadius: '8px' }
+                }}
+              />
+            )}
 
-          {activeStep === 0 && (
-            <Box sx={{ textAlign: 'center' }}>
-              {selectedGoal?.name === 'Custom Goal' && (
-                <TextField
-                  fullWidth
-                  label="Goal Name"
-                  variant="outlined"
-                  name="goalName"
-                  value={formData.goalName}
-                  onChange={handleChange}
-                  sx={{ mb: 3 }}
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
-                />
-              )}
-              
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 2 }}>
+              Investment Period (Years)
+            </Typography>
+            <Slider
+              value={formData.period}
+              onChange={(e, value) => setFormData({ ...formData, period: value })}
+              min={1}
+              max={25}
+              step={1}
+              valueLabelDisplay="auto"
+              marks={[
+                { value: 1, label: '1Y' },
+                { value: 5, label: '5Y' },
+                { value: 10, label: '10Y' },
+                { value: 25, label: '25Y' }
+              ]}
+              sx={{ 
+                mb: 3,
+                '& .MuiSlider-thumb': {
+                  backgroundColor: selectedGoal?.color || '#2A363B'
+                }
+              }}
+            />
+
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Expected Annual Returns (%)
+            </Typography>
+            <Slider
+              value={formData.interestRate}
+              onChange={(e, value) => setFormData({ ...formData, interestRate: value })}
+              min={1}
+              max={30}
+              step={0.5}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(value) => `${value}%`}
+              marks={[
+                { value: 1, label: '1%' },
+                { value: 10, label: '10%' },
+                { value: 20, label: '20%' },
+                { value: 30, label: '30%' }
+              ]}
+              sx={{ 
+                mb: 3,
+                '& .MuiSlider-thumb': {
+                  backgroundColor: selectedGoal?.color || '#2A363B'
+                }
+              }}
+            />
+
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Monthly Investment (₹)
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              name="monthlyInvestment"
+              type="number"
+              value={formData.monthlyInvestment}
+              onChange={handleChange}
+              sx={{ mb: 3 }}
+              InputProps={{
+                sx: { borderRadius: '8px' },
+                inputProps: { min: 500, step: 500 }
+              }}
+            />
+
+            {/* Pie Chart Section */}
+            <Box sx={{ height: '300px', mt: 4 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                How do you want to achieve this goal?
+                Investment Breakdown
               </Typography>
-              <Grid container spacing={2} sx={{ mt: 2 }}>
-                <Grid item xs={6}>
-                  <ColorButton
-                    fullWidth
-                    variant={formData.method === 'invest' ? 'contained' : 'outlined'}
-                    onClick={() => setFormData({ ...formData, method: 'invest' })}
-                    color="#4CAF50"
-                    sx={{ 
-                      py: 2,
-                      borderRadius: '8px',
-                      fontWeight: 600
-                    }}
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                    dataKey="value"
+                    nameKey="name"
                   >
-                    Invest
-                  </ColorButton>
-                </Grid>
-                <Grid item xs={6}>
-                  <ColorButton
-                    fullWidth
-                    variant={formData.method === 'save' ? 'contained' : 'outlined'}
-                    onClick={() => setFormData({ ...formData, method: 'save' })}
-                    color="#2196F3"
-                    sx={{ 
-                      py: 2,
-                      borderRadius: '8px',
-                      fontWeight: 600
-                    }}
-                  >
-                    Save
-                  </ColorButton>
-                </Grid>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid item xs={4}>
+                <Paper sx={{ p: 2, borderRadius: '8px', bgcolor: '#f5f5f5' }}>
+                  <Typography variant="body2" color="textSecondary">Invested Amount</Typography>
+                  <Typography variant="h6">₹{calculations.invested.toLocaleString()}</Typography>
+                </Paper>
               </Grid>
-            </Box>
-          )}
-
-          {activeStep === 1 && (
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Goal Details
-              </Typography>
-              <Slider
-                value={formData.period}
-                onChange={(e, value) => setFormData({ ...formData, period: value })}
-                min={1}
-                max={25}
-                step={1}
-                valueLabelDisplay="auto"
-                marks={[
-                  { value: 1, label: '1Y' },
-                  { value: 5, label: '5Y' },
-                  { value: 10, label: '10Y' },
-                  { value: 25, label: '25Y' }
-                ]}
-                sx={{ 
-                  mt: 4, 
-                  mb: 2,
-                  '& .MuiSlider-thumb': {
-                    backgroundColor: selectedGoal?.color || '#2A363B'
-                  }
-                }}
-              />
-              <Typography gutterBottom sx={{ fontWeight: 500 }}>
-                Investment Period: {formData.period} years
-              </Typography>
-
-              <TextField
-                fullWidth
-                label="Goal Amount (₹)"
-                variant="outlined"
-                name="goalAmount"
-                value={formData.goalAmount}
-                onChange={handleChange}
-                sx={{ my: 2 }}
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-
-              <TextField
-                fullWidth
-                label="Monthly Income (₹)"
-                variant="outlined"
-                name="monthlyIncome"
-                value={formData.monthlyIncome}
-                onChange={handleChange}
-                sx={{ mb: 2 }}
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Box>
-          )}
+              <Grid item xs={4}>
+                <Paper sx={{ p: 2, borderRadius: '8px', bgcolor: '#f5f5f5' }}>
+                  <Typography variant="body2" color="textSecondary">Estimated Returns</Typography>
+                  <Typography variant="h6" color="success.main">
+                    ₹{calculations.returns.toLocaleString()}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={4}>
+                <Paper sx={{ p: 2, borderRadius: '8px', bgcolor: '#f5f5f5' }}>
+                  <Typography variant="body2" color="textSecondary">Total Value</Typography>
+                  <Typography variant="h6" color="primary.main">
+                    ₹{calculations.total.toLocaleString()}
+                  </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Box>
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          {activeStep === 0 ? (
-            <Button 
-              onClick={handleClose}
-              sx={{ 
-                color: 'text.secondary',
-                '&:hover': { backgroundColor: 'transparent' }
-              }}
-            >
-              Cancel
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleBack}
-              sx={{ 
-                color: 'text.secondary',
-                '&:hover': { backgroundColor: 'transparent' }
-              }}
-            >
-              Back
-            </Button>
-          )}
-          
-          {activeStep === 0 ? (
-            <Button 
-              variant="contained" 
-              onClick={handleNext}
-              disabled={
-                !formData.method || 
-                (selectedGoal?.name === 'Custom Goal' && !formData.goalName)
+          <Button 
+            onClick={handleClose}
+            sx={{ 
+              color: 'text.secondary',
+              '&:hover': { backgroundColor: 'transparent' }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={handleSave}
+            disabled={!formData.monthlyInvestment || (selectedGoal?.name === 'Custom Goal' && !formData.goalName)}
+            sx={{
+              borderRadius: '8px',
+              py: 1,
+              px: 3,
+              fontWeight: 600,
+              backgroundColor: selectedGoal?.color || '#2A363B',
+              '&:hover': {
+                backgroundColor: selectedGoal?.color || '#2A363B',
+                opacity: 0.9
               }
-              sx={{
-                borderRadius: '8px',
-                py: 1,
-                px: 3,
-                fontWeight: 600,
-                backgroundColor: selectedGoal?.color || '#2A363B',
-                '&:hover': {
-                  backgroundColor: selectedGoal?.color || '#2A363B',
-                  opacity: 0.9
-                }
-              }}
-            >
-              Next
-            </Button>
-          ) : (
-            <Button 
-              variant="contained" 
-              onClick={handleSave}
-              disabled={!formData.goalAmount || !formData.monthlyIncome}
-              sx={{
-                borderRadius: '8px',
-                py: 1,
-                px: 3,
-                fontWeight: 600,
-                backgroundColor: selectedGoal?.color || '#2A363B',
-                '&:hover': {
-                  backgroundColor: selectedGoal?.color || '#2A363B',
-                  opacity: 0.9
-                }
-              }}
-            >
-              Save Goal
-            </Button>
-          )}
+            }}
+          >
+            Save Goal
+          </Button>
         </DialogActions>
       </Dialog>
     </div>
