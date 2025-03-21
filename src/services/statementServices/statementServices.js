@@ -17,8 +17,8 @@ export const upload_statement_service = asyncHandler(async (payload) => {
 
 
   export const get_all_statement_service = asyncHandler(async (user_statement_id) => {
-    const response = await apiClient.get(`${STATEMENT}/get_all_transactions`, {
-      params: { user_statement_id },
+    const response = await apiClient.get(`${STATEMENT}/get_all_transactions/${user_statement_id}`, {
+      // params: { user_statement_id },
     });
     return response;
   });
