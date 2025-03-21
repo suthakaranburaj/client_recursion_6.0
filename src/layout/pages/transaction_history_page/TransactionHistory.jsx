@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Table,
   TableBody,
@@ -9,72 +9,92 @@ import {
   Paper,
   Typography,
   Box,
-} from '@mui/material';
-
-// Dummy transaction data
-const transactions = [
-  { id: 1, date: '2023-10-01', narration: 'Salary', type: 'Cr', amount: 5000, balance: 5000 },
-  { id: 2, date: '2023-10-02', narration: 'Groceries', type: 'Dr', amount: 200, balance: 4800 },
-  { id: 3, date: '2023-10-03', narration: 'Rent', type: 'Dr', amount: 1000, balance: 3800 },
-  { id: 4, date: '2023-10-04', narration: 'Freelance Payment', type: 'Cr', amount: 1500, balance: 5300 },
-  { id: 5, date: '2023-10-05', narration: 'Utilities', type: 'Dr', amount: 150, balance: 5150 },
-  { id: 6, date: '2023-10-06', narration: 'Bonus', type: 'Cr', amount: 1000, balance: 6150 },
-];
+  CircularProgress
+} from "@mui/material";
+import { get_all_statement_service } from "../../../services/statementServices/statementServices";
 
 function TransactionHistory() {
+  const [transactions, setTransactions] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await get_all_statement_service();
+        if (response.status && response.data) {
+          console.log(response)
+          setTransactions(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: 'primary.main' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: "primary.main" }}>
         Transaction History
       </Typography>
-      <TableContainer component={Paper} elevation={3}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: 'primary.main' }}>
-              <TableCell sx={{ color: 'white', fontWeight: 600 }}>Date</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 600 }}>Narration</TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600 }}>
-                Withdrawal (Dr)
-              </TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600 }}>
-                Deposit (Cr)
-              </TableCell>
-              <TableCell align="right" sx={{ color: 'white', fontWeight: 600 }}>
-                Balance (₹)
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {transactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell>{transaction.date}</TableCell>
-                <TableCell>{transaction.narration}</TableCell>
-                <TableCell
-                  align="right"
-                  sx={{
-                    color: transaction.type === 'Dr' ? 'red' : 'transparent',
-                    fontWeight: 600,
-                  }}
-                >
-                  {transaction.type === 'Dr' ? `₹${transaction.amount}` : ''}
+
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper} elevation={3}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "primary.main" }}>
+                <TableCell sx={{ color: "white", fontWeight: 600 }}>Date</TableCell>
+                <TableCell sx={{ color: "white", fontWeight: 600 }}>Narration</TableCell>
+                <TableCell align="right" sx={{ color: "white", fontWeight: 600 }}>
+                  Withdrawal (Dr)
                 </TableCell>
-                <TableCell
-                  align="right"
-                  sx={{
-                    color: transaction.type === 'Cr' ? 'green' : 'transparent',
-                    fontWeight: 600,
-                  }}
-                >
-                  {transaction.type === 'Cr' ? `₹${transaction.amount}` : ''}
+                <TableCell align="right" sx={{ color: "white", fontWeight: 600 }}>
+                  Deposit (Cr)
                 </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>
-                  ₹{transaction.balance}
+                <TableCell align="right" sx={{ color: "white", fontWeight: 600 }}>
+                  Balance (₹)
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {transactions.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell>{transaction.date}</TableCell>
+                  <TableCell>{transaction.narration}</TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      color: transaction.type === "Debit" ? "error.main" : "transparent",
+                      fontWeight: 600
+                    }}
+                  >
+                    {transaction.type === "Debit" ? `₹${transaction.amount.toFixed(2)}` : ""}
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      color: transaction.type === "Credit" ? "success.main" : "transparent",
+                      fontWeight: 600
+                    }}
+                  >
+                    {transaction.type === "Credit" ? `₹${transaction.amount.toFixed(2)}` : ""}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>
+                    ₹{transaction.balance.toFixed(2)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
   );
 }

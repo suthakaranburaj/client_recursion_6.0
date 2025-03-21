@@ -94,6 +94,12 @@ const NAVIGATION = [
     title: "Transaction History",
     icon: <HistoryIcon />,
     path: "/history"
+  },
+  {
+    segment: "pdf",
+    title: "Statements",
+    icon: <HistoryIcon />,
+    path: "/pdf"
   }
 ];
 
@@ -365,6 +371,7 @@ function DashboardLayoutAccountSidebar(props) {
         signIn: () => setAuthView("login"), // Refresh user data on sign-in
         signOut: async () => {
           await logout_service();
+          localStorage.removeItem('statements')
           setSession(null);
           setTimeout(() => {
             globalThis.location.reload();

@@ -14,4 +14,9 @@ export const get_current_statement_service = asyncHandler(async () => {
 export const upload_statement_service = asyncHandler(async (payload) => {
     return await apiClient.post(`${STATEMENT}/save`, payload);
   });
-  
+
+
+export const get_all_statement_service = asyncHandler(async () => {
+  return await apiClient.get(`${STATEMENT}/get_all_transactions`);
+});
+
