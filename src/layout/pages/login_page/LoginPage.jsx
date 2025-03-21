@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { TextField,  IconButton, Button, Container, Typography, Box, Link, Snackbar } from "@mui/material";
+import {
+  TextField,
+  IconButton,
+  Button,
+  Container,
+  Typography,
+  Box,
+  Link,
+  Snackbar,
+  CircularProgress,
+} from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   login_service,
-  get_current_user_service
+  get_current_user_service,
 } from "../../../services/authServices/authServices";
 import { getCookie } from "../../../helper/commonHelper";
+
 const LoginPage = ({ onSwitchToRegister, onClose }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastSeverity, setToastSeverity] = useState("info");
+  const [isLoading, setIsLoading] = useState(false);
 
   const showToast = (message, severity = "error") => {
     setToastMessage(message);
@@ -22,23 +34,54 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Form validation
+    if (!email || !password) {
+      showToast("Please fill in all fields.");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      showToast("Please enter a valid email address.");
+      return;
+    }
+
+    setIsLoading(true);
+    const startTime = Date.now();
+
     try {
       const payload = {
         email: email,
-        password: password
+        password: password,
       };
       const response = await login_service(payload);
+
       if (response.data.status) {
         showToast("Login successful!", "success");
         await handle_get_user();
-        window.location.reload();
-        setTimeout(onClose, 2000);
+
+        const endTime = Date.now();
+        const timeDiff = endTime - startTime;
+
+        // Ensure loader runs for at least 2 seconds
+        if (timeDiff < 2000) {
+          setTimeout(() => {
+            window.location.reload();
+            setTimeout(onClose, 2000);
+            setIsLoading(false);
+          }, 2000 - timeDiff);
+        } else {
+          window.location.reload();
+          setTimeout(onClose, 2000);
+          setIsLoading(false);
+        }
       } else {
-        // console.log(response);
         showToast(response.data.message || "Login failed");
+        setIsLoading(false);
       }
     } catch (error) {
       showToast(error.response?.data?.message || "Login failed. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -53,7 +96,6 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
     const accessToken = getCookie("accessToken");
     const refreshToken = getCookie("refreshToken");
     if (!accessToken || !refreshToken) {
-      // setSession(null);
       localStorage.removeItem("user");
       return;
     }
@@ -61,18 +103,14 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
     try {
       const response = await get_current_user_service();
       if (response.data.data) {
-        // console.log('heelo')
-        // setSession({
-        //   user: response.data.data
-        // });
-        // localStorage.setItem("user", response.data.data);
+        localStorage.setItem("user", JSON.stringify(response.data.data));
       }
-      // console.log("response", response.data.data);
     } catch (error) {
       console.error("Error fetching user:", error);
-      // localStorage.removeItem("user");
+      localStorage.removeItem("user");
     }
   };
+
   return (
     <Box
       sx={{
@@ -86,7 +124,7 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
         zIndex: 1300,
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
       }}
     >
       <Container
@@ -94,32 +132,34 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
         }}
       >
         <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              p: 4,
-              boxShadow: 3,
-              borderRadius: 2,
-              width: "100%",
-              backgroundColor: "background.paper",
-              position: "relative",
-            }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            p: 4,
+            boxShadow: 3,
+            borderRadius: 2,
+            width: "100%",
+            backgroundColor: "background.paper",
+            position: "relative",
+          }}
+        >
+          {/* Close Button */}
+          <IconButton
+            onClick={onClose}
+            sx={{ position: "absolute", top: 10, right: 10 }}
           >
-            {/* Close Button */}
-            <IconButton
-              onClick={onClose}
-              sx={{ position: "absolute", top: 10, right: 10 }}
-            >
-              <CloseIcon />
-            </IconButton>
+            <CloseIcon />
+          </IconButton>
+
           <Typography variant="h5" gutterBottom>
             Login
           </Typography>
+
           <form onSubmit={handleLogin} style={{ width: "100%" }}>
             <TextField
               label="Email"
@@ -130,6 +170,8 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              error={!email && toastSeverity === "error"}
+              helperText={!email && "Email is required"}
             />
             <TextField
               label="Password"
@@ -140,14 +182,26 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              error={!password && toastSeverity === "error"}
+              helperText={!password && "Password is required"}
             />
-            <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
-              Login
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{ mt: 2 }}
+              disabled={isLoading}
+            >
+              {isLoading ? <CircularProgress size={24} /> : "Login"}
             </Button>
             <Box sx={{ mt: 1.5, textAlign: "center" }}>
               <Typography variant="body2">
                 Don't have an account?{" "}
-                <Link component="button" type="button" onClick={onSwitchToRegister}>
+                <Link
+                  component="button"
+                  type="button"
+                  onClick={onSwitchToRegister}
+                >
                   Register
                 </Link>
               </Typography>
