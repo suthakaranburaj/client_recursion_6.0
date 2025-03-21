@@ -3,16 +3,17 @@ import PropTypes from "prop-types";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
-import Avatar from "@mui/material/Avatar";
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import Person4Icon from '@mui/icons-material/Person4';
 import Divider from "@mui/material/Divider";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HistoryIcon from '@mui/icons-material/History';
 import CloudCircleIcon from "@mui/icons-material/CloudCircle";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout, ThemeSwitcher } from "@toolpad/core/DashboardLayout";
 import Chip from "@mui/material/Chip";
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -71,13 +72,13 @@ const NAVIGATION = [
   {
         segment: "budget-forecast",
         title: "Budget forecast",
-        icon: <DescriptionIcon />,
+        icon: <CurrencyRupeeIcon />,
         path: "/budget-forecast"
   },
   {
         segment: "chatbot",
         title: "Chatbot",
-        icon: <DescriptionIcon />,
+        icon: <SmartToyIcon />,
         path: "/chatbot"
   },
   // {
@@ -90,7 +91,7 @@ const NAVIGATION = [
   {
     segment: "history",
     title: "Transaction History",
-    icon: <LayersIcon />,
+    icon: <HistoryIcon />,
     path: "/history"
   }
 ];
