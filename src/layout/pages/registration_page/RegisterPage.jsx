@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -149,7 +149,14 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
       return;
     }
 
-    if (!formData.username || !formData.name || !formData.phone || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (
+      !formData.username ||
+      !formData.name ||
+      !formData.phone ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
       showToast("Please fill all the fields");
       return;
     }
@@ -168,10 +175,13 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
       const timeDiff = endTime - startTime;
 
       if (timeDiff < 2000) {
-        setTimeout(() => {
-          if (response.status) {
+        setTimeout(async () => {
+          if (response.data.status == true) {
             showToast(response.message || "Registration successful!", "success");
+            await handle_get_user();
+            window.location.reload();
             setTimeout(onClose, 2000);
+
           } else {
             showToast(response.message || "Registration failed!");
           }
@@ -192,6 +202,38 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    const checkUser = async () => {
+      await handle_get_user();
+    };
+    checkUser();
+  }, [onClose]);
+
+  const handle_get_user = async () => {
+    const accessToken = getCookie("accessToken");
+    const refreshToken = getCookie("refreshToken");
+    if (!accessToken || !refreshToken) {
+      // setSession(null);
+      localStorage.removeItem("user");
+      return;
+    }
+
+    try {
+      const response = await get_current_user_service();
+      if (response.data.data) {
+        // console.log('heelo')
+        // setSession({
+        //   user: response.data.data
+        // });
+        // localStorage.setItem("user", response.data.data);
+      }
+      // console.log("response", response.data.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      // localStorage.removeItem("user");
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -209,14 +251,22 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
       }}
     >
       <Container maxWidth="sm">
-        <Box sx={{ p: 4, boxShadow: 3, borderRadius: 2, backgroundColor: "background.paper", position: "relative" }}>
+        <Box
+          sx={{
+            p: 4,
+            boxShadow: 3,
+            borderRadius: 2,
+            backgroundColor: "background.paper",
+            position: "relative"
+          }}
+        >
           <IconButton
             onClick={onClose}
             sx={{
               position: "absolute",
               top: 20,
               right: 20,
-              color: "text.secondary",
+              color: "text.secondary"
             }}
           >
             <CloseIcon />
@@ -324,7 +374,11 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
               {passwordError && <Alert severity="error">{passwordError}</Alert>}
 
               <Button
-                type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={isLoading}
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{ mt: 2 }}
+                disabled={isLoading}
               >
                 {isLoading ? <CircularProgress size={24} /> : "Register"}
               </Button>
