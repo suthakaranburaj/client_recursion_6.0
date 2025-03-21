@@ -96,7 +96,9 @@ function TransactionHistory() {
       {/* Transaction Table */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-          <CircularProgress />
+          <Typography variant="body1" sx={{ textAlign: "center", mt: 2 }}>
+          No statement selected.
+        </Typography>
         </Box>
       ) : transactions.length === 0 ? (
         <Typography variant="body1" sx={{ textAlign: "center", mt: 2 }}>
