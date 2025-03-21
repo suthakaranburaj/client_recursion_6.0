@@ -1,4 +1,3 @@
-// src/components/ChatInterface.jsx
 import * as React from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -13,9 +12,12 @@ import Typography from '@mui/material/Typography';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { materialLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { materialLight, materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTheme } from '@mui/material/styles';
 
 const MarkdownRenderer = ({ children }) => {
+  const theme = useTheme();
+
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
@@ -24,7 +26,7 @@ const MarkdownRenderer = ({ children }) => {
           const match = /language-(\w+)/.exec(className || '');
           return !inline && match ? (
             <SyntaxHighlighter
-              style={materialLight}
+              style={theme.palette.mode === 'dark' ? materialDark : materialLight}
               language={match[1]}
               PreTag="div"
               {...props}
@@ -51,6 +53,7 @@ const MarkdownRenderer = ({ children }) => {
 };
 
 function Chatbot() {
+  const theme = useTheme();
   const [messages, setMessages] = React.useState([]);
   const [input, setInput] = React.useState('');
   const [error, setError] = React.useState(null);
@@ -99,7 +102,8 @@ function Chatbot() {
       display: 'flex',
       flexDirection: 'column',
       p: 2,
-      gap: 2
+      gap: 2,
+      backgroundColor: theme.palette.background.default,
     }}>
       <List sx={{ 
         flexGrow: 1,
@@ -132,34 +136,34 @@ function Chatbot() {
                 )
               }
               sx={{
-                bgcolor: msg.isBot ? 'action.selected' : 'primary.main',
-                color: msg.isBot ? 'text.primary' : 'primary.contrastText',
+                bgcolor: msg.isBot ? theme.palette.action.selected : theme.palette.primary.main,
+                color: msg.isBot ? theme.palette.text.primary : theme.palette.primary.contrastText,
                 p: 2,
                 borderRadius: 2,
                 '& pre': {
-                  backgroundColor: '#f5f5f5 !important',
-                  padding: '1rem !important',
-                  borderRadius: '4px !important',
-                  overflowX: 'auto !important'
+                  backgroundColor: theme.palette.mode === 'dark' ? '#333' : '#f5f5f5',
+                  padding: '1rem',
+                  borderRadius: '4px',
+                  overflowX: 'auto'
                 },
                 '& code': {
-                  fontFamily: 'monospace !important',
-                  backgroundColor: '#f5f5f5 !important',
-                  padding: '0.2em 0.4em !important',
-                  borderRadius: '3px !important'
+                  fontFamily: 'monospace',
+                  backgroundColor: theme.palette.mode === 'dark' ? '#333' : '#f5f5f5',
+                  padding: '0.2em 0.4em',
+                  borderRadius: '3px'
                 },
                 '& table': {
-                  borderCollapse: 'collapse !important',
-                  width: '100% !important',
-                  margin: '1rem 0 !important'
+                  borderCollapse: 'collapse',
+                  width: '100%',
+                  margin: '1rem 0'
                 },
                 '& th, & td': {
-                  border: '1px solid #ddd !important',
-                  padding: '8px !important',
-                  textAlign: 'left !important'
+                  border: `1px solid ${theme.palette.divider}`,
+                  padding: '8px',
+                  textAlign: 'left'
                 },
                 '& th': {
-                  backgroundColor: '#f5f5f5 !important'
+                  backgroundColor: theme.palette.mode === 'dark' ? '#333' : '#f5f5f5'
                 }
               }}
             />
@@ -177,7 +181,7 @@ function Chatbot() {
             </ListItemAvatar>
             <ListItemText
               sx={{
-                bgcolor: 'action.selected',
+                bgcolor: theme.palette.action.selected,
                 p: 2,
                 borderRadius: 2,
                 width: 'fit-content'
@@ -199,9 +203,8 @@ function Chatbot() {
         gap: 2,
         alignItems: 'center',
         p: 2,
-        borderTop: '1px solid',
-        borderColor: 'divider',
-        background: 'white'
+        borderTop: `1px solid ${theme.palette.divider}`,
+        background: theme.palette.background.paper
       }}>
         <TextField
           fullWidth
@@ -236,7 +239,7 @@ function Chatbot() {
         .typing-dot {
           width: 8px;
           height: 8px;
-          background: #666;
+          background: ${theme.palette.text.secondary};
           border-radius: 50%;
           animation: typing 1.2s infinite ease-in-out;
         }
@@ -246,6 +249,5 @@ function Chatbot() {
     </Box>
   );
 }
+
 export default Chatbot;
-
-

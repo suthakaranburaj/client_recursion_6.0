@@ -8,11 +8,18 @@ import {
   Paper,
   List,
   ListItem,
-  CircularProgress
+  CircularProgress,
+  Container,
+  Stack,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import DescriptionIcon from "@mui/icons-material/Description";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   upload_statement_service,
-  get_current_statement_service
+  get_current_statement_service,
 } from "../../../services/statementServices/statementServices";
 
 const PdfUpload = () => {
@@ -31,6 +38,7 @@ const PdfUpload = () => {
       setFetching(true);
       const response = await get_current_statement_service();
       if (response.data.status) {
+        
         setStatements(response.data.data);
       }
     } catch (error) {
@@ -85,115 +93,141 @@ const PdfUpload = () => {
       month: "long",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        minHeight: "100vh",
-        p: 3
-      }}
-    >
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: 600,
-          mb: 4,
-          textAlign: "center"
-        }}
-      >
-        <Typography variant="h4" gutterBottom>
-          Upload PDF File
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          Please select a PDF file to upload
-        </Typography>
-
-        <Input
-          type="file"
-          inputProps={{ accept: "application/pdf" }}
-          onChange={handleFileChange}
-          sx={{ mb: 2 }}
-        />
-
-        {file && (
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Selected file: {file.name}
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+        <Box sx={{ textAlign: "center", mb: 4 }}>
+          <Typography variant="h4" gutterBottom>
+            Upload PDF File
           </Typography>
-        )}
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            Please select a PDF file to upload
+          </Typography>
 
-        {uploadStatus === "success" && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            File uploaded successfully!
-          </Alert>
-        )}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Button
+              component="label"
+              variant="contained"
+              startIcon={<CloudUploadIcon />}
+              sx={{ width: "fit-content" }}
+            >
+              Choose File
+              <Input
+                type="file"
+                inputProps={{ accept: "application/pdf" }}
+                onChange={handleFileChange}
+                sx={{ display: "none" }}
+              />
+            </Button>
 
-        {uploadStatus === "error" && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {file ? "Failed to upload file. Please try again." : "Please select a valid PDF file."}
-          </Alert>
-        )}
+            {file && (
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                Selected file: {file.name}
+              </Typography>
+            )}
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={!file || loading}
-          sx={{ mb: 4 }}
-        >
-          {loading ? <CircularProgress size={24} /> : "Upload"}
-        </Button>
+            {uploadStatus === "success" && (
+              <Alert severity="success" sx={{ width: "100%", mt: 2 }}>
+                File uploaded successfully!
+              </Alert>
+            )}
 
-        <Typography variant="h5" gutterBottom>
-          Uploaded Statements
-        </Typography>
+            {uploadStatus === "error" && (
+              <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
+                {file
+                  ? "Failed to upload file. Please try again."
+                  : "Please select a valid PDF file."}
+              </Alert>
+            )}
 
-        {fetching ? (
-          <CircularProgress />
-        ) : statements.length === 0 ? (
-          <Typography variant="body1">No statements uploaded yet</Typography>
-        ) : (
-          <List sx={{ width: "100%" }}>
-            {statements.map((statement) => (
-              <Paper key={statement.id} sx={{ mb: 2, p: 2 }}>
-                <ListItem>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%"
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="subtitle1">Statement ID: {statement.id}</Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Uploaded: {formatDate(statement.createdAt)}
-                      </Typography>
-                    </Box>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      href={statement.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmit}
+              disabled={!file || loading}
+              sx={{ mt: 2 }}
+            >
+              {loading ? <CircularProgress size={24} /> : "Upload"}
+            </Button>
+          </Box>
+        </Box>
+
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Uploaded Statements
+          </Typography>
+
+          {fetching ? (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : statements.length === 0 ? (
+            <Typography variant="body1" sx={{ textAlign: "center", mt: 2 }}>
+              No statements uploaded yet
+            </Typography>
+          ) : (
+            <List sx={{ width: "100%" }}>
+              {statements.map((statement) => (
+                <Paper key={statement.id} sx={{ mb: 2, p: 2 }}>
+                  <ListItem>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
+                      }}
                     >
-                      View PDF
-                    </Button>
-                  </Box>
-                </ListItem>
-              </Paper>
-            ))}
-          </List>
-        )}
-      </Box>
-    </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <DescriptionIcon fontSize="large" color="primary" />
+                        <Box>
+                          <Typography variant="subtitle1">
+                            Statement ID: {statement.id}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Uploaded: {formatDate(statement.createdAt)}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Stack direction="row" spacing={1}>
+                        <Tooltip title="View PDF">
+                          <IconButton
+                            color="primary"
+                            href={statement.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <DescriptionIcon />
+                          </IconButton>
+                        </Tooltip>
+                        {/* <Tooltip title="Delete">
+                          <IconButton color="error">
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip> */}
+                      </Stack>
+                    </Box>
+                  </ListItem>
+                </Paper>
+              ))}
+            </List>
+          )}
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 

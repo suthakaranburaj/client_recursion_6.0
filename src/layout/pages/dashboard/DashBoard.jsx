@@ -107,14 +107,14 @@ function DashBoard() {
         </Grid>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
-            <InputLabel>Category</InputLabel>
+            {/* <InputLabel>Category</InputLabel>
             <Select value={categoryFilter} onChange={handleCategoryFilterChange}
               sx={{ bgcolor: 'background.paper', borderRadius: '8px', '& .MuiSelect-select': { py: 1.5 } }}>
               <MenuItem value="All">All Categories</MenuItem>
               {dashboardData.expenseData.map((category, index) => (
                 <MenuItem key={index} value={category.name}>{category.name}</MenuItem>
               ))}
-            </Select>
+            </Select> */}
           </FormControl>
         </Grid>
       </Grid>
