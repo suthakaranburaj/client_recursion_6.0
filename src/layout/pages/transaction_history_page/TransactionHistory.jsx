@@ -9,31 +9,61 @@ import {
   Paper,
   Typography,
   Box,
-  CircularProgress
+  CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
-import { get_all_statement_service } from "../../../services/statementServices/statementServices";
+import { get_all_statement_service, get_current_statement_service } from "../../../services/statementServices/statementServices";
 
 function TransactionHistory() {
   const [transactions, setTransactions] = React.useState([]);
+  const [statements, setStatements] = React.useState([]);
+  const [selectedStatement, setSelectedStatement] = React.useState("");
   const [loading, setLoading] = React.useState(true);
+  const [statementLoading, setStatementLoading] = React.useState(true);
 
+  // Fetch all statements for the dropdown
   React.useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchStatements = async () => {
       try {
-        const response = await get_all_statement_service();
-        if (response.status && response.data) {
-          console.log(response)
-          setTransactions(response.data.data);
+        const response = await get_current_statement_service();
+        if (response.data && response.data.status) {
+          setStatements(response.data.data);
         }
       } catch (error) {
-        console.error("Error fetching transactions:", error);
+        console.error("Error fetching statements:", error);
       } finally {
-        setLoading(false);
+        setStatementLoading(false);
       }
     };
 
-    fetchTransactions();
+    fetchStatements();
   }, []);
+
+  // Fetch transactions based on the selected statement
+  React.useEffect(() => {
+    if (selectedStatement) {
+      const fetchTransactions = async () => {
+        try {
+          setLoading(true);
+          const response = await get_all_statement_service(selectedStatement);
+          if (response.data && response.data.status) {
+            setTransactions(response.data.data);
+          }
+        } catch (error) {
+          console.error("Error fetching transactions:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchTransactions();
+    } else {
+      setTransactions([]); // Clear transactions if no statement is selected
+    }
+  }, [selectedStatement]);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -41,10 +71,37 @@ function TransactionHistory() {
         Transaction History
       </Typography>
 
+      {/* Dropdown to select statement */}
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel id="statement-select-label">Select Statement</InputLabel>
+        <Select
+          labelId="statement-select-label"
+          id="statement-select"
+          value={selectedStatement}
+          label="Select Statement"
+          onChange={(e) => setSelectedStatement(e.target.value)}
+          disabled={statementLoading}
+        >
+          <MenuItem value="" disabled>
+            {statementLoading ? "Loading statements..." : "No file selected"}
+          </MenuItem>
+          {statements.map((statement) => (
+            <MenuItem key={statement.id} value={statement.id}>
+              {statement.name || `Statement ${statement.id}`}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Transaction Table */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <CircularProgress />
         </Box>
+      ) : transactions.length === 0 ? (
+        <Typography variant="body1" sx={{ textAlign: "center", mt: 2 }}>
+          No transactions found for the selected statement.
+        </Typography>
       ) : (
         <TableContainer component={Paper} elevation={3}>
           <Table>
@@ -72,7 +129,7 @@ function TransactionHistory() {
                     align="right"
                     sx={{
                       color: transaction.type === "Debit" ? "error.main" : "transparent",
-                      fontWeight: 600
+                      fontWeight: 600,
                     }}
                   >
                     {transaction.type === "Debit" ? `₹${transaction.amount.toFixed(2)}` : ""}
@@ -81,7 +138,7 @@ function TransactionHistory() {
                     align="right"
                     sx={{
                       color: transaction.type === "Credit" ? "success.main" : "transparent",
-                      fontWeight: 600
+                      fontWeight: 600,
                     }}
                   >
                     {transaction.type === "Credit" ? `₹${transaction.amount.toFixed(2)}` : ""}
