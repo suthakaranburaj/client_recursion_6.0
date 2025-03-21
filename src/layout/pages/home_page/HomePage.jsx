@@ -71,23 +71,24 @@ const NAVIGATION = [
     title: "Analytics"
   },
   {
-    segment: "budget-forecast",
-    title: "Budget forecast",
-    icon: <CurrencyRupeeIcon />,
-    path: "/budget-forecast"
+        segment: "budget-forecast",
+        title: "Budget forecast",
+        icon: <CurrencyRupeeIcon />,
+        path: "/budget-forecast"
   },
   {
-    segment: "chatbot",
-    title: "Chatbot",
-    icon: <SmartToyIcon />,
-    path: "/chatbot"
+        segment: "chatbot",
+        title: "Chatbot",
+        icon: <SmartToyIcon />,
+        path: "/chatbot"
   },
   // {
-  //   segment: "insurances",
-  //   title: "Insurances",
-  //   icon: <DescriptionIcon />,
-  //   path: ""
-  // },
+  //       segment: "insurances",
+  //       title: "Insurances",
+  //       icon: <DescriptionIcon />,
+  //       path: ""
+  // }
+  ,
   {
     segment: "history",
     title: "Transaction History",
@@ -101,23 +102,10 @@ const NAVIGATION = [
     path: "/pdf"
   },
   {
-    segment: "goals",
-    title: "Goals",
-    icon: <HistoryIcon />,
-    children: [
-      {
-        segment: "plan-goal",
-        title: "Plan Goals",
-        icon: <EmojiEventsIcon />,
-        path: "/plan-goal"
-      },
-      {
-        segment: "add-goal",
-        title: "Add Goals",
-        icon: <EmojiEventsIcon />,
-        path: "/add-goal"
-      }
-    ]
+    segment: "add-goal",
+    title: "Add Goals",
+    icon: <EmojiEventsIcon />,
+    path: "/add-goal"
   }
 ];
 
