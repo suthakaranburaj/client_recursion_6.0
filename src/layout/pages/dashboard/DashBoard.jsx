@@ -25,11 +25,11 @@ const monthlyTrends = [
 ];
 
 const cashFlowData = [
-  { date: '2023-10-01', income: 5000, expenses: 2000 },
-  { date: '2023-10-02', income: 0, expenses: 500 },
-  { date: '2023-10-03', income: 1500, expenses: 300 },
-  { date: '2023-10-04', income: 0, expenses: 1000 },
-  { date: '2023-10-05', income: 0, expenses: 200 },
+  { date: '2023-10-01', income: 5000, expenses: 2000, category: 'Salary' },
+  { date: '2023-10-02', income: 0, expenses: 500, category: 'Groceries' },
+  { date: '2023-10-03', income: 1500, expenses: 300, category: 'Freelance' },
+  { date: '2023-10-04', income: 0, expenses: 1000, category: 'Rent' },
+  { date: '2023-10-05', income: 0, expenses: 200, category: 'Utilities' },
 ];
 
 // Colors for pie chart
@@ -49,11 +49,44 @@ function DashBoard() {
     setCategoryFilter(event.target.value);
   };
 
-  // Filter data based on date range and category
-  const filteredData = cashFlowData.filter((entry) => {
-    // Add logic to filter based on date range (e.g., 1D, 1W, 1M, etc.)
-    return true; // Placeholder, replace with actual filtering logic
-  });
+  // Filter data based on date range
+  const filterDataByDateRange = (data) => {
+    const now = new Date();
+    const filteredData = data.filter((entry) => {
+      const entryDate = new Date(entry.date);
+      switch (dateRange) {
+        case '1D':
+          return entryDate.toDateString() === now.toDateString();
+        case '1W':
+          return entryDate >= new Date(now.setDate(now.getDate() - 7));
+        case '1M':
+          return entryDate >= new Date(now.setMonth(now.getMonth() - 1));
+        case '1Y':
+          return entryDate >= new Date(now.setFullYear(now.getFullYear() - 1));
+        case '5Y':
+          return entryDate >= new Date(now.setFullYear(now.getFullYear() - 5));
+        case 'All':
+          return true;
+        default:
+          return true;
+      }
+    });
+    return filteredData;
+  };
+
+  // Filter data based on category
+  const filterDataByCategory = (data) => {
+    if (categoryFilter === 'All') {
+      return data;
+    }
+    return data.filter((entry) => entry.category === categoryFilter);
+  };
+
+  // Apply filters to cashflow data
+  const filteredCashFlowData = filterDataByCategory(filterDataByDateRange(cashFlowData));
+
+  // Apply filters to expense data for pie chart
+  const filteredExpenseData = filterDataByCategory(expenseData);
 
   return (
     <div style={{ padding: '20px' }}>
@@ -120,7 +153,7 @@ function DashBoard() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={expenseData}
+                  data={filteredExpenseData}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -130,7 +163,7 @@ function DashBoard() {
                   dataKey="value"
                   label
                 >
-                  {expenseData.map((entry, index) => (
+                  {filteredExpenseData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -148,7 +181,7 @@ function DashBoard() {
               Cashflow Over Time
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={filteredData}>
+              <LineChart data={filteredCashFlowData}>
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
