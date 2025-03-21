@@ -100,9 +100,9 @@ function DashBoard() {
           <FormControl fullWidth>
             <InputLabel>Date Range</InputLabel>
             <Select value={dateRange} onChange={handleDateRangeChange}>
-              <MenuItem value="1D">1D</MenuItem>
+              {/* <MenuItem value="1D">1D</MenuItem>
               <MenuItem value="1W">1W</MenuItem>
-              <MenuItem value="1M">1M</MenuItem>
+              <MenuItem value="1M">1M</MenuItem> */}
               <MenuItem value="1Y">1Y</MenuItem>
               <MenuItem value="5Y">5Y</MenuItem>
               <MenuItem value="All">All</MenuItem>

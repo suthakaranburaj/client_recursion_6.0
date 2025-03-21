@@ -18,14 +18,8 @@ import {
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import EditIcon from "@mui/icons-material/Edit";
-import LockIcon from "@mui/icons-material/Lock";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import PersonIcon from "@mui/icons-material/Person";
-import BadgeIcon from "@mui/icons-material/Badge";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CloseIcon from "@mui/icons-material/Close";
 import { save_user_service, get_current_user_service } from "../../../services/authServices/authServices";
 import { email_send_otp_services, email_verify_otp_services } from "../../../services/emailServices/emailServices";
 
@@ -61,7 +55,8 @@ function ProfilePage() {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastSeverity, setToastSeverity] = useState("info");
-  const [selectedImage, setSelectedImage] = useState(null); // To store the selected image file
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [bankStatementFile, setBankStatementFile] = useState(null);
 
   const showToast = (message, severity = "error") => {
     setToastMessage(message);
@@ -80,12 +75,36 @@ function ProfilePage() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedImage(file); // Store the selected file
+      setSelectedImage(file);
       setProfileData((prev) => ({
         ...prev,
-        image: URL.createObjectURL(file), // Preview the image
+        image: URL.createObjectURL(file),
       }));
     }
+  };
+
+  const handleBankStatementChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setBankStatementFile(file);
+    } else {
+      showToast("Please upload a valid PDF file.");
+    }
+  };
+
+  const handleUploadBankStatement = () => {
+    if (!bankStatementFile) {
+      showToast("Please select a PDF file first.");
+      return;
+    }
+
+    // Simulate file upload (replace with actual API call)
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      showToast("Bank statement uploaded successfully!", "success");
+      setBankStatementFile(null);
+    }, 2000);
   };
 
   const handleSendOtp = async () => {
@@ -173,40 +192,36 @@ function ProfilePage() {
     }
   };
 
-// ... (previous code)
-
-const handleSaveImage = async () => {
-  if (!selectedImage) {
-    showToast("Please select an image first");
-    return;
-  }
-
-  setIsLoading(true);
-
-  const formPayload = new FormData();
-  formPayload.append("user_id", user.user_id);
-  formPayload.append("image", selectedImage); // Append only the image file
-
-  try {
-    const response = await save_user_service(formPayload);
-    if (response.status) {
-      showToast("Profile image updated successfully!", "success");
-      const updatedUserResponse = await get_current_user_service();
-      const updatedUser = updatedUserResponse.data.data;
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setEditImageMode(false);
-      setSelectedImage(null); // Reset the selected image
-    } else {
-      showToast(response.message || "Failed to update profile image");
+  const handleSaveImage = async () => {
+    if (!selectedImage) {
+      showToast("Please select an image first");
+      return;
     }
-  } catch (error) {
-    showToast(error.response?.data?.message || "Failed to update profile image");
-  } finally {
-    setIsLoading(false);
-  }
-};
 
-// ... (rest of the code)
+    setIsLoading(true);
+
+    const formPayload = new FormData();
+    formPayload.append("user_id", user.user_id);
+    formPayload.append("image", selectedImage);
+
+    try {
+      const response = await save_user_service(formPayload);
+      if (response.status) {
+        showToast("Profile image updated successfully!", "success");
+        const updatedUserResponse = await get_current_user_service();
+        const updatedUser = updatedUserResponse.data.data;
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setEditImageMode(false);
+        setSelectedImage(null);
+      } else {
+        showToast(response.message || "Failed to update profile image");
+      }
+    } catch (error) {
+      showToast(error.response?.data?.message || "Failed to update profile image");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -390,15 +405,33 @@ const handleSaveImage = async () => {
                   >
                     Cancel
                   </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => alert("Delete Account")}
+                    sx={{ ml: 2 }}
+                  >
+                    Delete Account
+                  </Button>
                 </Box>
               ) : (
-                <Button
-                  variant="contained"
-                  startIcon={<EditIcon />}
-                  onClick={() => setEditProfileMode(true)}
-                >
-                  Edit Profile
-                </Button>
+                <Box>
+                  <Button
+                    variant="contained"
+                    startIcon={<EditIcon />}
+                    onClick={() => setEditProfileMode(true)}
+                    sx={{ mr: 2 }}
+                  >
+                    Edit Profile
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => alert("Delete Account")}
+                  >
+                    Delete Account
+                  </Button>
+                </Box>
               )}
             </Paper>
           </Grid>
@@ -414,21 +447,26 @@ const handleSaveImage = async () => {
             <Grid item>
               <Button
                 variant="outlined"
-                startIcon={<LockIcon />}
-                onClick={() => alert("Change Password")}
+                component="label"
                 sx={{ px: 4, py: 2 }}
               >
-                Change Password
+                Add Bank Statement
+                <input
+                  type="file"
+                  hidden
+                  accept="application/pdf"
+                  onChange={handleBankStatementChange}
+                />
               </Button>
             </Grid>
             <Grid item>
               <Button
-                variant="outlined"
-                startIcon={<DeleteIcon />}
-                onClick={() => alert("Delete Account")}
+                variant="contained"
+                onClick={handleUploadBankStatement}
+                disabled={!bankStatementFile || isLoading}
                 sx={{ px: 4, py: 2 }}
               >
-                Delete Account
+                {isLoading ? <CircularProgress size={24} /> : "Upload"}
               </Button>
             </Grid>
           </Grid>
