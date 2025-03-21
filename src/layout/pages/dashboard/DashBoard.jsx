@@ -12,6 +12,7 @@ import {
   MonetizationOn, Business, AccountBalance, Receipt, 
   AttachMoney, ShowChart, PieChart as PieChartIcon
 } from '@mui/icons-material';
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import { get_dashboard_stats_service } from '../../../services/statementServices/statementServices';
 import { asyncHandler } from '../../../helper/commonHelper';
 
@@ -37,7 +38,7 @@ function DashBoard() {
     netSavings: 0,
     topTransactions: []
   });
-  const [dateRange, setDateRange] = useState('1Y');
+  const [dateRange, setDateRange] = useState('1W');
   const [categoryFilter, setCategoryFilter] = useState('All');
 
   useEffect(() => {
@@ -69,12 +70,21 @@ function DashBoard() {
     return data.filter((entry) => {
       const entryDate = new Date(entry.date);
       switch (dateRange) {
-        case '1D': return entryDate.toDateString() === now.toDateString();
-        case '1W': return entryDate >= new Date(now.setDate(now.getDate() - 7));
-        case '1M': return entryDate >= new Date(now.setMonth(now.getMonth() - 1));
-        case '1Y': return entryDate >= new Date(now.setFullYear(now.getFullYear() - 1));
-        case '5Y': return entryDate >= new Date(now.setFullYear(now.getFullYear() - 5));
-        default: return true;
+        
+        case '1W': 
+          return entryDate >= new Date(now.setDate(now.getDate() - 7));
+        case '1M': 
+          return entryDate >= new Date(now.setMonth(now.getMonth() - 1));
+        case '6M': 
+          return entryDate >= new Date(now.setMonth(now.getMonth() - 6));
+        case '1Y': 
+          return entryDate >= new Date(now.setFullYear(now.getFullYear() - 1));
+        case '5Y': 
+          return entryDate >= new Date(now.setFullYear(now.getFullYear() - 5));
+        case 'All': 
+          return true;
+        default: 
+          return true;
       }
     });
   };
@@ -89,7 +99,7 @@ function DashBoard() {
   return (
     <Box sx={{ p: 3, bgcolor: 'background.default', minHeight: '100vh' }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
-        <AccountBalance sx={{ fontSize: 40 }} />
+        <CurrencyRupeeIcon sx={{ fontSize: 40 }} />
         Financial Dashboard
       </Typography>
 
@@ -97,8 +107,15 @@ function DashBoard() {
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
             <InputLabel>Date Range</InputLabel>
-            <Select value={dateRange} onChange={handleDateRangeChange}
-              sx={{ bgcolor: 'background.paper', borderRadius: '8px', '& .MuiSelect-select': { py: 1.5 } }}>
+            <Select 
+              value={dateRange} 
+              onChange={handleDateRangeChange}
+              sx={{ bgcolor: 'background.paper', borderRadius: '8px', '& .MuiSelect-select': { py: 1.5 } }}
+            >
+             
+              <MenuItem value="1W">1 Week</MenuItem>
+              <MenuItem value="1M">1 Month</MenuItem>
+              <MenuItem value="6M">6 Months</MenuItem>
               <MenuItem value="1Y">1 Year</MenuItem>
               <MenuItem value="5Y">5 Years</MenuItem>
               <MenuItem value="All">All Time</MenuItem>
@@ -127,7 +144,7 @@ function DashBoard() {
               <Box>
                 <Typography variant="h6">Current Balance</Typography>
                 <Typography variant="h3" sx={{ fontWeight: 800 }}>
-                  ${dashboardData.netSavings.toLocaleString()}
+                  ₹{dashboardData.netSavings.toLocaleString()}
                 </Typography>
               </Box>
             </Box>
@@ -146,7 +163,7 @@ function DashBoard() {
                     {index === 0 ? <Home /> : index === 1 ? <DirectionsCar /> : <School />}
                   </ListItemIcon>
                   <ListItemText 
-                    primary={`${transaction.name} - $${transaction.value.toLocaleString()}`} 
+                    primary={`${transaction.name} - ₹${transaction.value.toLocaleString()}`} 
                   />
                 </ListItem>
               ))}
@@ -262,11 +279,11 @@ function DashBoard() {
                       <Grid container spacing={1}>
                         <Grid item xs={6}>
                           <Typography variant="caption" sx={{ opacity: 0.9 }}>Target</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>${goal.goalAmount.toLocaleString()}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>₹{goal.goalAmount.toLocaleString()}</Typography>
                         </Grid>
                         <Grid item xs={6}>
                           <Typography variant="caption" sx={{ opacity: 0.9 }}>Invested</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>${goal.investedAmount.toLocaleString()}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>₹{goal.investedAmount.toLocaleString()}</Typography>
                         </Grid>
                       </Grid>
                       <Box sx={{ position: 'absolute', top: 0, right: 0, width: '40px', height: '40px', 
