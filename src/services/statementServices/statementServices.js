@@ -20,3 +20,8 @@ export const get_all_statement_service = asyncHandler(async () => {
   return await apiClient.get(`${STATEMENT}/get_all_transactions`);
 });
 
+// statementServices.js
+export const get_dashboard_stats_service = asyncHandler(async () => {
+  const response = await apiClient.get(`${STATEMENT}/stats`);
+  return response;
+});
