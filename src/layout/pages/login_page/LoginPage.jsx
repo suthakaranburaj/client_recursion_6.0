@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { TextField, Button, Container, Typography, Box, Link, Snackbar } from "@mui/material";
+import { TextField,  IconButton, Button, Container, Typography, Box, Link, Snackbar } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   login_service,
   get_current_user_service
@@ -97,17 +98,25 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
         }}
       >
         <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            p: 4,
-            boxShadow: 3,
-            borderRadius: 2,
-            width: "100%",
-            backgroundColor: "background.paper"
-          }}
-        >
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              p: 4,
+              boxShadow: 3,
+              borderRadius: 2,
+              width: "100%",
+              backgroundColor: "background.paper",
+              position: "relative",
+            }}
+          >
+            {/* Close Button */}
+            <IconButton
+              onClick={onClose}
+              sx={{ position: "absolute", top: 10, right: 10 }}
+            >
+              <CloseIcon />
+            </IconButton>
           <Typography variant="h5" gutterBottom>
             Login
           </Typography>

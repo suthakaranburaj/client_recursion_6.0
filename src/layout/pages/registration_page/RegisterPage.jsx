@@ -17,6 +17,7 @@ import {
   Snackbar
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
+import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -47,6 +48,7 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastSeverity, setToastSeverity] = useState("info");
+  const [isLoading, setIsLoading] = useState(false);
 
   const showToast = (message, severity = "error") => {
     setToastMessage(message);
@@ -127,6 +129,7 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
     if (!isVerified) {
       showToast("Please verify your email first");
       return;
@@ -137,6 +140,19 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setPasswordError("Password must be at least 8 characters long!");
+      return;
+    }
+
+    if (!formData.username || !formData.name || !formData.phone || !formData.email || !formData.password || !formData.confirmPassword) {
+      showToast("Please fill all the fields");
+      return;
+    }
+
+    setIsLoading(true);
+    const startTime = Date.now();
+
     const formPayload = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (key !== "confirmPassword") formPayload.append(key, value);
@@ -144,16 +160,31 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
 
     try {
       const response = await save_user_service(formPayload);
-      
-      if(response.status){
-        showToast(response.message || "Registration successful!", "success");
-        setTimeout(onClose, 2000);
-      }
-      else{
-        showToast(response.message || "Registration failed!");
+      const endTime = Date.now();
+      const timeDiff = endTime - startTime;
+
+      if (timeDiff < 2000) {
+        setTimeout(() => {
+          if (response.status) {
+            showToast(response.message || "Registration successful!", "success");
+            setTimeout(onClose, 2000);
+          } else {
+            showToast(response.message || "Registration failed!");
+          }
+          setIsLoading(false);
+        }, 2000 - timeDiff);
+      } else {
+        if (response.status) {
+          showToast(response.message || "Registration successful!", "success");
+          setTimeout(onClose, 2000);
+        } else {
+          showToast(response.message || "Registration failed!");
+        }
+        setIsLoading(false);
       }
     } catch (error) {
       showToast(error.response?.data?.message || "Registration failed");
+      setIsLoading(false);
     }
   };
 
@@ -174,14 +205,18 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
       }}
     >
       <Container maxWidth="sm">
-        <Box
-          sx={{
-            backgroundColor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4
-          }}
-        >
+        <Box sx={{ p: 4, boxShadow: 3, borderRadius: 2, backgroundColor: "background.paper", position: "relative" }}>
+          <IconButton
+            onClick={onClose}
+            sx={{
+              position: "absolute",
+              top: 20,
+              right: 20,
+              color: "text.secondary",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
           <Typography variant="h4" component="h1" gutterBottom align="center">
             Create Account
           </Typography>
@@ -285,14 +320,9 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
               {passwordError && <Alert severity="error">{passwordError}</Alert>}
 
               <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                fullWidth
-                disabled={!isVerified}
-                sx={{ mt: 2 }}
+                type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={isLoading}
               >
-                Register
+                {isLoading ? <CircularProgress size={24} /> : "Register"}
               </Button>
 
               <Typography align="center" sx={{ mt: 2 }}>
