@@ -68,29 +68,29 @@ const NAVIGATION = [
     title: "Analytics"
   },
   {
-        segment: "Budget",
-        title: "Budget forecasting",
+        segment: "budget-forecast",
+        title: "Budget forecast",
         icon: <DescriptionIcon />,
-        path: ""
+        path: "/budget-forecast"
   },
   {
         segment: "chatbot",
         title: "Chatbot",
         icon: <DescriptionIcon />,
-        path: ""
+        path: "/chatbot"
   },
-  {
-        segment: "insurances",
-        title: "Insurances",
-        icon: <DescriptionIcon />,
-        path: ""
-  }
+  // {
+  //       segment: "insurances",
+  //       title: "Insurances",
+  //       icon: <DescriptionIcon />,
+  //       path: ""
+  // }
   ,
   {
     segment: "history",
     title: "Transaction History",
     icon: <LayersIcon />,
-    path: ""
+    path: "/history"
   }
 ];
 

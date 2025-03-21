@@ -20,19 +20,29 @@ const router = createBrowserRouter([
       {
         path: Routes.DASHBOARD,
         element: (
-          // <AuthGuard>
+          <AuthGuard>
             <Pages.Dashboard />
-          // </AuthGuard>
+          </AuthGuard>
         )
       },
       {
         path: Routes.PROFILE,
         element: (
-          <AuthGuard>
-            <Pages.ProfilePage />
-          </AuthGuard>
+            <AuthGuard><Pages.ProfilePage /></AuthGuard>  
         )
-      }
+      },
+      {
+        path: Routes.BUDGETFORECAST,
+        element:(<AuthGuard><Pages.BudgetForecast /> </AuthGuard>)
+      },
+      {
+        path: Routes.CHATBOT,
+        element:(<AuthGuard> <Pages.Chatbot /> </AuthGuard>)
+      },
+      {
+        path: Routes.TRANSACTION_HISTORY,
+        element:(<AuthGuard><Pages.TransactionHistory /> </AuthGuard>)
+      },
     ]
   },
   {

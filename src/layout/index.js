@@ -4,3 +4,6 @@ export { default as HomePage } from "../App.jsx";
 export { default as HomePage_main } from "./pages/home_page/HomePage.jsx";
 export { default as Dashboard } from "./pages/dashboard/DashBoard.jsx";
 export { default as ProfilePage } from "./pages/profile_page/ProfilePage.jsx";
+export {default as BudgetForecast} from "./pages/budget_forecasting_page/BudgetForecast.jsx"
+export {default as Chatbot} from "./pages/chatbot_page/Chatbot.jsx"
+export {default as TransactionHistory} from "./pages/transaction_history_page/TransactionHistory.jsx"
