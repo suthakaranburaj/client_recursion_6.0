@@ -1,20 +1,42 @@
-import React,{ useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
-import * as Pages from "../index.js"; // Adjust import path as needed
+import * as Pages from "../index"; // Adjust import path as needed
 
 export const AuthGuard = ({ children }) => {
   const [authView, setAuthView] = useState(null);
-  const user = localStorage.getItem("user");
+  const [user, setUser] = useState(null);
+  const [statement, setStatement] = useState(null);
 
-  // Recheck user when authView changes (modal closes)
-  React.useEffect(() => {
-    // Optional: Add any additional session checking logic here
+  // Recheck user and statement when authView changes (modal closes)
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedStatement = localStorage.getItem("statement");
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser)); // Parse the user object
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage:", error);
+        setUser(null);
+      }
+    } else {
+      setUser(null);
+    }
+
+    setStatement(storedStatement);
   }, [authView]);
 
-  if (user) {
+  // If user is logged in but hasn't uploaded a PDF, show the PdfUpload component
+  if (user && !statement) {
+    return <Pages.PdfUpload />;
+  }
+
+  // If user is logged in and has uploaded a PDF, show the children
+  if (user && statement) {
     return children;
   }
 
+  // If user is not logged in, show the login/register UI
   return (
     <Box
       sx={{
@@ -24,7 +46,7 @@ export const AuthGuard = ({ children }) => {
         justifyContent: "center",
         minHeight: "100vh",
         textAlign: "center",
-        p: 3
+        p: 3,
       }}
     >
       <Typography variant="h5" gutterBottom>
@@ -34,10 +56,18 @@ export const AuthGuard = ({ children }) => {
         Please login or register to access this page.
       </Typography>
       <Box sx={{ display: "flex", gap: 2 }}>
-        <Button variant="contained" onClick={() => setAuthView("login")} color="primary">
+        <Button
+          variant="contained"
+          onClick={() => setAuthView("login")}
+          color="primary"
+        >
           Login
         </Button>
-        <Button variant="outlined" onClick={() => setAuthView("register")} color="primary">
+        <Button
+          variant="outlined"
+          onClick={() => setAuthView("register")}
+          color="primary"
+        >
           Register
         </Button>
       </Box>

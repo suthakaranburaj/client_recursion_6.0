@@ -29,6 +29,7 @@ import {
   email_send_otp_services,
   email_verify_otp_services
 } from "../../../services/emailServices/emailServices";
+import { get_current_statement_service } from "../../../services/statementServices/statementServices";
 import { getCookie } from "../../../helper/commonHelper";
 
 const RegisterPage = ({ onSwitchToLogin, onClose }) => {
@@ -220,12 +221,18 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
 
     try {
       const response = await get_current_user_service();
+      const statementresponse = await get_current_statement_service();
+      console.log(statementresponse);
+      
       if (response.data.data) {
         // console.log('heelo')
         // setSession({
         //   user: response.data.data
         // });
         // localStorage.setItem("user", response.data.data);
+        localStorage.setItem("user", JSON.stringify(response.data.data));
+       localStorage.setItem("statement", JSON.stringify(response.data.data));
+
       }
       // console.log("response", response.data.data);
     } catch (error) {

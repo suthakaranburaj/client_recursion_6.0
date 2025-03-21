@@ -7,3 +7,4 @@ export { default as ProfilePage } from "./pages/profile_page/ProfilePage.jsx";
 export {default as BudgetForecast} from "./pages/budget_forecasting_page/BudgetForecast.jsx"
 export {default as Chatbot} from "./pages/chatbot_page/Chatbot.jsx"
 export {default as TransactionHistory} from "./pages/transaction_history_page/TransactionHistory.jsx"
+export {default as PdfUpload} from "./pages/pdf_upload_page/PdfUpload.jsx"
