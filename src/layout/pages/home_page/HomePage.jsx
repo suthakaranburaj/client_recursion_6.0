@@ -94,6 +94,12 @@ const NAVIGATION = [
     title: "Transaction History",
     icon: <HistoryIcon />,
     path: "/history"
+  },
+  {
+    segment: "pdf",
+    title: "Statements",
+    icon: <HistoryIcon />,
+    path: "/pdf"
   }
 ];
 

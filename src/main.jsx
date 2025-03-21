@@ -43,6 +43,10 @@ const router = createBrowserRouter([
         path: Routes.TRANSACTION_HISTORY,
         element:(<AuthGuard><Pages.TransactionHistory /> </AuthGuard>)
       },
+      {
+        path: Routes.UPLOADPDF,
+        element:(<AuthGuard><Pages.PdfUpload /> </AuthGuard>)
+      },
     ]
   },
   {

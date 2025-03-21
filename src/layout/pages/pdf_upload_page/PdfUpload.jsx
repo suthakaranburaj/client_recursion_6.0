@@ -31,8 +31,8 @@ const PdfUpload = () => {
 
       // Call the upload service
       const response = await upload_statement_service(formData);
-
-      if (response.success) {
+      console.log(response)
+      if (response.data.status == true) {
         setUploadStatus("success");
         setFile(null); // Clear the file input after successful upload
 
