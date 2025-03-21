@@ -68,33 +68,27 @@ const NAVIGATION = [
     title: "Analytics"
   },
   {
-    segment: "/invest",
-    title: "Invest",
-    icon: <BarChartIcon />,
-    children: [
-      {
-        segment: "bonds",
-        title: "Bonds",
+        segment: "Budget",
+        title: "Budget forecasting",
         icon: <DescriptionIcon />,
         path: ""
-      },
-      {
-        segment: "stocks",
-        title: "Stocks",
+  },
+  {
+        segment: "chatbot",
+        title: "Chatbot",
         icon: <DescriptionIcon />,
         path: ""
-      },
-      {
+  },
+  {
         segment: "insurances",
         title: "Insurances",
         icon: <DescriptionIcon />,
         path: ""
-      }
-    ]
-  },
+  }
+  ,
   {
     segment: "history",
-    title: "History",
+    title: "Transaction History",
     icon: <LayersIcon />,
     path: ""
   }
@@ -218,11 +212,11 @@ function CustomAppTitle() {
   return (
     <Stack direction="row" alignItems="center" spacing={2}>
       <CloudCircleIcon fontSize="large" color="primary" />
-      <Typography variant="h6">My App</Typography>
-      <Chip size="small" label="BETA" color="info" />
+      <Typography variant="h6">Your Finance Tracker</Typography>
+      {/* <Chip size="small" label="BETA" color="info" />
       <Tooltip title="Connected to production">
         <CheckCircleIcon color="success" fontSize="small" />
-      </Tooltip>
+      </Tooltip> */}
     </Stack>
   );
 }
