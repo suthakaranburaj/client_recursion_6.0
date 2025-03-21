@@ -1,3 +1,4 @@
+// src/components/ChatInterface.jsx
 import * as React from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -9,13 +10,11 @@ import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-// Markdown renderer for bot responses
 const MarkdownRenderer = ({ children }) => {
   return (
     <ReactMarkdown
@@ -42,12 +41,8 @@ const MarkdownRenderer = ({ children }) => {
           return <table className="markdown-table">{children}</table>;
         },
         a({ href, children }) {
-          return (
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              {children}
-            </a>
-          );
-        },
+          return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+        }
       }}
     >
       {children}
@@ -61,73 +56,66 @@ function Chatbot() {
   const [error, setError] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  // Handle sending a message
   const handleSend = async () => {
     if (!input.trim()) return;
 
     // Add user message
     const newMessage = { text: input, isBot: false };
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
     setInput('');
     setIsLoading(true);
-
+    
     try {
-      // Simulate API call (replace with your actual API endpoint)
       const response = await fetch('http://localhost:5000/api/finance-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: input }),
+        body: JSON.stringify({ prompt: input })
       });
 
       if (!response.ok) throw new Error('API request failed');
-
+      
       const data = await response.json();
-
+      
       // Add bot response
-      setMessages((prev) => [
-        ...prev,
-        { text: data.bot_response || data.error, isBot: true },
-      ]);
+      setMessages(prev => [...prev, { 
+        text: data.bot_response || data.error, 
+        isBot: true 
+      }]);
+      
     } catch (err) {
       setError(err.message);
-      setMessages((prev) => [
-        ...prev,
-        { text: 'Error communicating with the assistant', isBot: true },
-      ]);
+      setMessages(prev => [...prev, { 
+        text: 'Error communicating with the assistant', 
+        isBot: true 
+      }]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        height: 'calc(100vh - 128px)',
+    <Box sx={{ 
+      height: 'calc(100vh - 128px)',
+      display: 'flex',
+      flexDirection: 'column',
+      p: 2,
+      gap: 2
+    }}>
+      <List sx={{ 
+        flexGrow: 1,
+        overflow: 'auto',
+        mb: 2,
         display: 'flex',
         flexDirection: 'column',
-        p: 2,
-        gap: 2,
-        backgroundColor: '#f5f5f5',
-      }}
-    >
-      {/* Chat Messages */}
-      <List
-        sx={{
-          flexGrow: 1,
-          overflow: 'auto',
-          mb: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-        }}
-      >
+        gap: 2
+      }}>
         {messages.map((msg, index) => (
-          <ListItem
+          <ListItem 
             key={index}
             sx={{
               alignSelf: msg.isBot ? 'flex-start' : 'flex-end',
               maxWidth: '80%',
-              width: 'fit-content',
+              width: 'fit-content'
             }}
           >
             {msg.isBot && (
@@ -140,46 +128,39 @@ function Chatbot() {
                 msg.isBot ? (
                   <MarkdownRenderer>{msg.text}</MarkdownRenderer>
                 ) : (
-                  <Typography
-                    sx={{
-                      color: 'white',
-                      p: 2,
-                      borderRadius: 2,
-                      backgroundColor: 'primary.main',
-                    }}
-                  >
-                    {msg.text}
-                  </Typography>
+                  msg.text
                 )
               }
               sx={{
-                bgcolor: msg.isBot ? 'background.paper' : 'transparent',
-                p: 0,
+                bgcolor: msg.isBot ? 'action.selected' : 'primary.main',
+                color: msg.isBot ? 'text.primary' : 'primary.contrastText',
+                p: 2,
+                borderRadius: 2,
                 '& pre': {
                   backgroundColor: '#f5f5f5 !important',
                   padding: '1rem !important',
                   borderRadius: '4px !important',
-                  overflowX: 'auto !important',
+                  overflowX: 'auto !important'
                 },
                 '& code': {
                   fontFamily: 'monospace !important',
                   backgroundColor: '#f5f5f5 !important',
                   padding: '0.2em 0.4em !important',
-                  borderRadius: '3px !important',
+                  borderRadius: '3px !important'
                 },
                 '& table': {
                   borderCollapse: 'collapse !important',
                   width: '100% !important',
-                  margin: '1rem 0 !important',
+                  margin: '1rem 0 !important'
                 },
                 '& th, & td': {
                   border: '1px solid #ddd !important',
                   padding: '8px !important',
-                  textAlign: 'left !important',
+                  textAlign: 'left !important'
                 },
                 '& th': {
-                  backgroundColor: '#f5f5f5 !important',
-                },
+                  backgroundColor: '#f5f5f5 !important'
+                }
               }}
             />
             {!msg.isBot && (
@@ -196,15 +177,16 @@ function Chatbot() {
             </ListItemAvatar>
             <ListItemText
               sx={{
-                bgcolor: 'background.paper',
+                bgcolor: 'action.selected',
                 p: 2,
                 borderRadius: 2,
-                width: 'fit-content',
+                width: 'fit-content'
               }}
               primary={
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                  <CircularProgress size={20} />
-                  <Typography variant="body2">Thinking...</Typography>
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
                 </Box>
               }
             />
@@ -212,19 +194,15 @@ function Chatbot() {
         )}
       </List>
 
-      {/* Input Area */}
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 2,
-          alignItems: 'center',
-          p: 2,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          backgroundColor: 'white',
-          borderRadius: 2,
-        }}
-      >
+      <Box sx={{ 
+        display: 'flex',
+        gap: 2,
+        alignItems: 'center',
+        p: 2,
+        borderTop: '1px solid',
+        borderColor: 'divider',
+        background: 'white'
+      }}>
         <TextField
           fullWidth
           variant="outlined"
@@ -233,35 +211,39 @@ function Chatbot() {
           onKeyPress={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Ask financial questions..."
           disabled={isLoading}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-            },
-          }}
         />
         <Button
           variant="contained"
           endIcon={<SendIcon />}
           onClick={handleSend}
           disabled={!input.trim() || isLoading}
-          sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            height: '56px',
-          }}
         >
           Send
         </Button>
       </Box>
 
-      {/* Error Message */}
       {error && (
         <Typography color="error" variant="body2" sx={{ mt: 1 }}>
           Error: {error}
         </Typography>
       )}
+
+      <style>{`
+        @keyframes typing {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+        .typing-dot {
+          width: 8px;
+          height: 8px;
+          background: #666;
+          border-radius: 50%;
+          animation: typing 1.2s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+      `}</style>
     </Box>
   );
 }
-
 export default Chatbot;

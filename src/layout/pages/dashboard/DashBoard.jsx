@@ -36,7 +36,7 @@ const cashFlowData = [
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
 
 function DashBoard() {
-  const [dateRange, setDateRange] = useState('1M'); // Default date range
+  const [dateRange, setDateRange] = useState('1Y'); // Default date range
   const [categoryFilter, setCategoryFilter] = useState('All'); // Default category filter
 
   // Handle date range change
