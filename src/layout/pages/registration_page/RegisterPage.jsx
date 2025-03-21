@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   TextField,
   Button,
@@ -20,11 +20,15 @@ import MuiAlert from "@mui/material/Alert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { save_user_service } from "../../../services/authServices/authServices";
+import {
+  save_user_service,
+  get_current_user_service
+} from "../../../services/authServices/authServices";
 import {
   email_send_otp_services,
   email_verify_otp_services
 } from "../../../services/emailServices/emailServices";
+import { getCookie } from "../../../helper/commonHelper";
 
 const RegisterPage = ({ onSwitchToLogin, onClose }) => {
   const [formData, setFormData] = useState({
@@ -144,9 +148,12 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
 
     try {
       const response = await save_user_service(formPayload);
-      
-      if(response.status){
+      // console.log(response.data,'hee')
+      // console.log(response,'heeeeee')
+      if(response.data.status == true){
         showToast(response.message || "Registration successful!", "success");
+        await handle_get_user();
+        window.location.reload();
         setTimeout(onClose, 2000);
       }
       else{
@@ -156,6 +163,38 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
       showToast(error.response?.data?.message || "Registration failed");
     }
   };
+
+    useEffect(() => {
+      const checkUser = async () => {
+        await handle_get_user();
+      };
+      checkUser();
+    }, [onClose]);
+
+    const handle_get_user = async () => {
+      const accessToken = getCookie("accessToken");
+      const refreshToken = getCookie("refreshToken");
+      if (!accessToken || !refreshToken) {
+        // setSession(null);
+        localStorage.removeItem("user");
+        return;
+      }
+
+      try {
+        const response = await get_current_user_service();
+        if (response.data.data) {
+          // console.log('heelo')
+          // setSession({
+          //   user: response.data.data
+          // });
+          // localStorage.setItem("user", response.data.data);
+        }
+        // console.log("response", response.data.data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        // localStorage.removeItem("user");
+      }
+    };
 
   return (
     <Box
