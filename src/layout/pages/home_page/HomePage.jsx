@@ -16,7 +16,7 @@ import Chip from "@mui/material/Chip";
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
-import BarChartIcon from "@mui/icons-material/BarChart";
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import DescriptionIcon from "@mui/icons-material/Description";
 import LayersIcon from "@mui/icons-material/Layers";
 import SearchIcon from "@mui/icons-material/Search";
@@ -100,6 +100,12 @@ const NAVIGATION = [
     title: "Statements",
     icon: <HistoryIcon />,
     path: "/pdf"
+  },
+  {
+    segment: "add-goal",
+    title: "Add Goals",
+    icon: <EmojiEventsIcon />,
+    path: "/add-goal"
   }
 ];
 

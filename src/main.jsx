@@ -47,6 +47,10 @@ const router = createBrowserRouter([
         path: Routes.UPLOADPDF,
         element:(<AuthGuard><Pages.PdfUpload /> </AuthGuard>)
       },
+      {
+        path: Routes.ADDGOAL,
+        element:(<AuthGuard><Pages.AddGoal /> </AuthGuard>)
+      },
     ]
   },
   {

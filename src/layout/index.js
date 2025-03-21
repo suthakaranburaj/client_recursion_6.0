@@ -8,3 +8,4 @@ export {default as BudgetForecast} from "./pages/budget_forecasting_page/BudgetF
 export {default as Chatbot} from "./pages/chatbot_page/Chatbot.jsx"
 export {default as TransactionHistory} from "./pages/transaction_history_page/TransactionHistory.jsx"
 export {default as PdfUpload} from "./pages/pdf_upload_page/PdfUpload.jsx"
+export {default as AddGoal} from "./pages/add_goal_page/addGoal.jsx"
