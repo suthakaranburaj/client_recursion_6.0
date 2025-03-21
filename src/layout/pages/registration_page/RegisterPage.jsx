@@ -180,9 +180,9 @@ const RegisterPage = ({ onSwitchToLogin, onClose }) => {
           if (response.data.status == true) {
             showToast(response.message || "Registration successful!", "success");
             await handle_get_user();
-            window.location.reload();
+            
             setTimeout(onClose, 2000);
-
+            window.location.reload();
           } else {
             showToast(response.message || "Registration failed!");
           }
