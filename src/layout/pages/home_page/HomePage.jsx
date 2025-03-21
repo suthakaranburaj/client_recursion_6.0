@@ -365,6 +365,7 @@ function DashboardLayoutAccountSidebar(props) {
         signIn: () => setAuthView("login"), // Refresh user data on sign-in
         signOut: async () => {
           await logout_service();
+          localStorage.removeItem('statements')
           setSession(null);
           setTimeout(() => {
             globalThis.location.reload();
