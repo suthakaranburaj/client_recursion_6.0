@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   TextField,
   Button,
@@ -21,11 +21,15 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { save_user_service } from "../../../services/authServices/authServices";
+import {
+  save_user_service,
+  get_current_user_service
+} from "../../../services/authServices/authServices";
 import {
   email_send_otp_services,
   email_verify_otp_services
 } from "../../../services/emailServices/emailServices";
+import { getCookie } from "../../../helper/commonHelper";
 
 const RegisterPage = ({ onSwitchToLogin, onClose }) => {
   const [formData, setFormData] = useState({
