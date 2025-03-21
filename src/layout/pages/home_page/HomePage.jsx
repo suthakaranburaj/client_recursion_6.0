@@ -26,6 +26,7 @@ import {
   logout_service,
   get_current_user_service
 } from "../../../services/authServices/authServices.js";
+import { get_current_statement_service } from "../../../services/statementServices/statementServices.js";
 
 import {
   Account,
@@ -324,13 +325,19 @@ function DashboardLayoutAccountSidebar(props) {
 
     try {
       const response = await get_current_user_service();
+      const statementresponse = await get_current_statement_service();
       if (response.data.data) {
         // console.log('heelo')
         setSession({
           user: response.data.data
         });
+       localStorage.setItem("user", JSON.stringify(response.data.data));
+        localStorage.setItem("statement", JSON.stringify(statementresponse.data.data));
+        
       }
-      console.log("response", response.data.data);
+      // console.log("response", response.data.data);
+      // console.log("2nd response",statementresponse.data.data);
+      
     } catch (error) {
       console.error("Error fetching user:", error);
       setSession(null);
