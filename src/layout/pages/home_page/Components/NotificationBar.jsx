@@ -4,19 +4,57 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
-import MailIcon from "@mui/icons-material/Mail"; // Updated import for MailIcon
+import MailIcon from "@mui/icons-material/Mail";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
+import {
+  get_current_notification_service,
+  update_notification_service,
+} from "../../../../services/notificationServices/notificationServices";
 
 const NotificationBar = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [notifications, setNotifications] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
+  // Fetch notifications on component mount
+  React.useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await get_current_notification_service();
+        if (response.data && response.data.status) {
+          setNotifications(response.data.data);
+        } else {
+          setError("Failed to fetch notifications");
+        }
+      } catch (err) {
+        console.error("Error fetching notifications:", err);
+        setError("Error fetching notifications");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  // Handle opening/closing the popover
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
     setAnchorEl(null);
+
+    // Send a POST request to update notifications when the popover is closed
+    try {
+      await update_notification_service({ notifications });
+      console.log("Notifications updated successfully");
+    } catch (err) {
+      console.error("Error updating notifications:", err);
+    }
   };
 
   const open = Boolean(anchorEl);
@@ -31,13 +69,13 @@ const NotificationBar = () => {
             {
               name: "offset",
               options: {
-                offset: [0, 10] // [horizontal, vertical] offset
-              }
-            }
-          ]
+                offset: [0, 10], // [horizontal, vertical] offset
+              },
+            },
+          ],
         }}
       >
-        <Badge badgeContent={3} color="primary">
+        <Badge badgeContent={notifications.length} color="primary">
           <IconButton
             aria-describedby={id}
             color="inherit"
@@ -47,6 +85,7 @@ const NotificationBar = () => {
           </IconButton>
         </Badge>
       </Tooltip>
+
       <Popover
         id={id}
         open={open}
@@ -65,9 +104,24 @@ const NotificationBar = () => {
           <Typography variant="h6" gutterBottom>
             Notifications
           </Typography>
-          <Typography variant="body1">You have 3 new messages.</Typography>
-          <Typography variant="body1">Your account has been updated.</Typography>
-          <Typography variant="body1">New feature available!</Typography>
+
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : error ? (
+            <Typography variant="body1" color="error">
+              {error}
+            </Typography>
+          ) : notifications.length === 0 ? (
+            <Typography variant="body1">No new notifications.</Typography>
+          ) : (
+            notifications.map((notification, index) => (
+              <Typography key={index} variant="body1" sx={{ mb: 1 }}>
+                {notification.message}
+              </Typography>
+            ))
+          )}
         </Box>
       </Popover>
     </Stack>
