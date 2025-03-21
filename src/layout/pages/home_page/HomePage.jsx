@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
 import Avatar from "@mui/material/Avatar";
+import Person4Icon from '@mui/icons-material/Person4';
 import Divider from "@mui/material/Divider";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -51,7 +52,7 @@ const NAVIGATION = [
   {
     segment: "profile",
     title: "Profile",
-    icon: <DashboardIcon />,
+    icon: <Person4Icon />,
     path: "/profile"
   },
   // {

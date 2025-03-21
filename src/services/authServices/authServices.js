@@ -4,7 +4,11 @@ import { AUTH } from "../index.js";
 import { asyncHandler } from "../../helper/commonHelper.js";
 
 export const save_user_service = asyncHandler(async (payload) => {
-  return await apiClient.post(`${AUTH}/save`, payload);
+  return await apiClient.post(`${AUTH}/save`, payload, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 });
 
 export const logout_service = asyncHandler(async () => {
