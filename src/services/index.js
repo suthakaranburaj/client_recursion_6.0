@@ -10,6 +10,6 @@ const NOTIFICATION = `${VITE_SERVER_URL}/notification`
 const SUBS = `${VITE_SERVER_URL}/subscription`;
 const TRANSACTION = `${VITE_SERVER_URL}/statements`
 
-const FORCAST = `http://127.0.0.1:8000/api/predict-spends/`;
+const FORCAST = `${VITE_SERVER_URL}/statements/add_tt`;
 
 export { AUTH,SUBS, EMAIL, STATEMENT, NOTIFICATION,TRANSACTION, FORCAST };
