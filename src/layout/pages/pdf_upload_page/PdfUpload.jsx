@@ -4,7 +4,6 @@ import {
   Typography,
   Button,
   Input,
-  Alert,
   Paper,
   List,
   ListItem,
@@ -13,21 +12,26 @@ import {
   Stack,
   IconButton,
   Tooltip,
+  Snackbar,
+  TextField
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DescriptionIcon from "@mui/icons-material/Description";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   upload_statement_service,
-  get_current_statement_service,
+  get_current_statement_service
 } from "../../../services/statementServices/statementServices";
 
 const PdfUpload = () => {
   const [file, setFile] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [statements, setStatements] = useState([]);
   const [fetching, setFetching] = useState(true);
+  const [password, setPassword] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
 
   useEffect(() => {
     fetchStatements();
@@ -38,7 +42,6 @@ const PdfUpload = () => {
       setFetching(true);
       const response = await get_current_statement_service();
       if (response.data.status) {
-        
         setStatements(response.data.data);
       }
     } catch (error) {
@@ -52,15 +55,14 @@ const PdfUpload = () => {
     const selectedFile = event.target.files[0];
     if (selectedFile && selectedFile.type === "application/pdf") {
       setFile(selectedFile);
-      setUploadStatus(null);
-    } else {
-      setUploadStatus("error");
     }
   };
 
   const handleSubmit = async () => {
-    if (!file) {
-      setUploadStatus("error");
+    if (!file || !password) {
+      setSnackbarMessage("Please select a file and enter password");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
       return;
     }
 
@@ -69,19 +71,27 @@ const PdfUpload = () => {
     try {
       const formData = new FormData();
       formData.append("statements", file);
+      formData.append("password", password);
 
       const response = await upload_statement_service(formData);
       if (response.data.status === true) {
-        setUploadStatus("success");
         setFile(null);
+        setPassword("");
         localStorage.setItem("statement", "uploaded");
-        await fetchStatements(); // Refresh the list after upload
+        setSnackbarMessage(response.data.message);
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+        await fetchStatements();
       } else {
-        setUploadStatus("error");
+        setSnackbarMessage(response.data.message);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
     } catch (error) {
       console.error("Error uploading file:", error);
-      setUploadStatus("error");
+      setSnackbarMessage("An error occurred while uploading the file.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     } finally {
       setLoading(false);
     }
@@ -93,9 +103,13 @@ const PdfUpload = () => {
       month: "long",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -114,7 +128,7 @@ const PdfUpload = () => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: 2,
+              gap: 2
             }}
           >
             <Button
@@ -138,25 +152,19 @@ const PdfUpload = () => {
               </Typography>
             )}
 
-            {uploadStatus === "success" && (
-              <Alert severity="success" sx={{ width: "100%", mt: 2 }}>
-                File uploaded successfully!
-              </Alert>
-            )}
-
-            {uploadStatus === "error" && (
-              <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
-                {file
-                  ? "Failed to upload file. Please try again."
-                  : "Please select a valid PDF file."}
-              </Alert>
-            )}
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              sx={{ width: "100%", mt: 2 }}
+            />
 
             <Button
               variant="contained"
               color="primary"
               onClick={handleSubmit}
-              disabled={!file || loading}
+              disabled={!file || !password || loading}
               sx={{ mt: 2 }}
             >
               {loading ? <CircularProgress size={24} /> : "Upload"}
@@ -187,15 +195,13 @@ const PdfUpload = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        width: "100%",
+                        width: "100%"
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                         <DescriptionIcon fontSize="large" color="primary" />
                         <Box>
-                          <Typography variant="subtitle1">
-                            Statement ID: {statement.id}
-                          </Typography>
+                          <Typography variant="subtitle1">Statement ID: {statement.id}</Typography>
                           <Typography variant="body2" color="textSecondary">
                             Uploaded: {formatDate(statement.createdAt)}
                           </Typography>
@@ -213,11 +219,6 @@ const PdfUpload = () => {
                             <DescriptionIcon />
                           </IconButton>
                         </Tooltip>
-                        {/* <Tooltip title="Delete">
-                          <IconButton color="error">
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip> */}
                       </Stack>
                     </Box>
                   </ListItem>
@@ -227,6 +228,23 @@ const PdfUpload = () => {
           )}
         </Box>
       </Paper>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
     </Container>
   );
 };

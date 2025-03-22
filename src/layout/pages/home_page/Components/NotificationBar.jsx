@@ -48,9 +48,18 @@ const NotificationBar = () => {
   const handleClose = async () => {
     setAnchorEl(null);
 
+    // Mark all notifications as read
+    const updatedNotifications = notifications.map((notification) => ({
+      ...notification,
+      read: true,
+    }));
+
+    // Update the state to reflect read notifications
+    setNotifications(updatedNotifications);
+
     // Send a POST request to update notifications when the popover is closed
     try {
-      await update_notification_service({ notifications });
+      await update_notification_service({ notifications: updatedNotifications });
       console.log("Notifications updated successfully");
     } catch (err) {
       console.error("Error updating notifications:", err);
@@ -59,6 +68,9 @@ const NotificationBar = () => {
 
   const open = Boolean(anchorEl);
   const id = open ? "notification-popover" : undefined;
+
+  // Count unread notifications
+  const unreadCount = notifications.filter((notification) => !notification.read).length;
 
   return (
     <Stack spacing={2} direction="row" alignItems="center" sx={{ mr: 1 }}>
@@ -75,7 +87,7 @@ const NotificationBar = () => {
           ],
         }}
       >
-        <Badge badgeContent={notifications.length} color="primary">
+        <Badge badgeContent={unreadCount} color="primary">
           <IconButton
             aria-describedby={id}
             color="inherit"
@@ -117,9 +129,36 @@ const NotificationBar = () => {
             <Typography variant="body1">No new notifications.</Typography>
           ) : (
             notifications.map((notification, index) => (
-              <Typography key={index} variant="body1" sx={{ mb: 1 }}>
-                {notification.message}
-              </Typography>
+              <Box
+                key={index}
+                sx={{
+                  p: 1,
+                  mb: 1,
+                  borderRadius: "4px",
+                  backgroundColor: notification.read ? "background.paper" : "action.hover",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  position: "relative",
+                }}
+              >
+                {!notification.read && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      backgroundColor: "primary.main",
+                      color: "common.white",
+                      borderRadius: "4px",
+                      px: 1,
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    New
+                  </Box>
+                )}
+                <Typography variant="body1">{notification.message}</Typography>
+              </Box>
             ))
           )}
         </Box>

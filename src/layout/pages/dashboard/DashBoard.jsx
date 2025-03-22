@@ -14,18 +14,8 @@ import {
 } from '@mui/icons-material';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import { get_dashboard_stats_service } from '../../../services/statementServices/statementServices';
+import { get_goal_service } from '../../../services/goalServices/goalservices';
 import { asyncHandler } from '../../../helper/commonHelper';
-
-// Dummy data for goals (keep as is)
-const goalsData = [
-  { goal: 'Home Goal', period: 10, goalAmount: 500000, investedAmount: 200000, icon: <Home />, color: '#FF6F61' },
-  { goal: 'First Car', period: 5, goalAmount: 300000, investedAmount: 100000, icon: <DirectionsCar />, color: '#6B5B95' },
-  { goal: 'Kids Education', period: 15, goalAmount: 1000000, investedAmount: 300000, icon: <School />, color: '#88B04B' },
-  { goal: 'Travel the World', period: 20, goalAmount: 200000, investedAmount: 50000, icon: <Flight />, color: '#F7CAC9' },
-  { goal: 'Marriage Goal', period: 7, goalAmount: 500000, investedAmount: 250000, icon: <Favorite />, color: '#92A8D1' },
-  { goal: 'My First Crore', period: 25, goalAmount: 10000000, investedAmount: 1000000, icon: <MonetizationOn />, color: '#955251' },
-  { goal: 'Startup Fund', period: 10, goalAmount: 2000000, investedAmount: 500000, icon: <Business />, color: '#B565A7' },
-];
 
 // Colors for pie chart
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
@@ -38,6 +28,7 @@ function DashBoard() {
     netSavings: 0,
     topTransactions: []
   });
+  const [goalsData, setGoalsData] = useState([]); // State for goals data
   const [dateRange, setDateRange] = useState('1W');
   const [categoryFilter, setCategoryFilter] = useState('All');
 
@@ -54,7 +45,16 @@ function DashBoard() {
         });
       }
     };
+
+    const fetchGoalsData = async () => {
+      const response = await asyncHandler(get_goal_service)();
+      if (response?.data?.data) {
+        setGoalsData(response.data.data); // Set goals data from the backend
+      }
+    };
+
     fetchDashboardData();
+    fetchGoalsData();
   }, []);
 
   const handleDateRangeChange = (event) => {
@@ -70,7 +70,6 @@ function DashBoard() {
     return data.filter((entry) => {
       const entryDate = new Date(entry.date);
       switch (dateRange) {
-        
         case '1W': 
           return entryDate >= new Date(now.setDate(now.getDate() - 7));
         case '1M': 
@@ -112,7 +111,6 @@ function DashBoard() {
               onChange={handleDateRangeChange}
               sx={{ bgcolor: 'background.paper', borderRadius: '8px', '& .MuiSelect-select': { py: 1.5 } }}
             >
-             
               <MenuItem value="1W">1 Week</MenuItem>
               <MenuItem value="1M">1 Month</MenuItem>
               <MenuItem value="6M">6 Months</MenuItem>
@@ -257,47 +255,105 @@ function DashBoard() {
               <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Financial Goals</Typography>
             </Box>
             <Grid container spacing={2}>
-              {goalsData.map((goal, index) => {
-                const progress = (goal.investedAmount / goal.goalAmount) * 100;
-                return (
-                  <Grid item xs={12} md={6} lg={4} key={index}>
-                    <Paper sx={{ p: 2, borderRadius: '12px', background: `linear-gradient(135deg, ${goal.color} 30%, ${goal.color}dd 100%)`, 
-                      color: 'common.white', textAlign: 'left', transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-5px)', 
-                      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)' }, position: 'relative', overflow: 'hidden' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <IconButton sx={{ color: 'common.white', bgcolor: 'rgba(255, 255, 255, 0.2)', borderRadius: '10px', p: 1.5 }}>
-                          {goal.icon}
-                        </IconButton>
-                        <Box>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1.1rem' }}>{goal.goal}</Typography>
-                          <Typography variant="caption" sx={{ opacity: 0.9, fontSize: '0.85rem' }}>{goal.period} years goal</Typography>
-                        </Box>
-                      </Box>
-                      <Box sx={{ mt: 2, mb: 1.5, bgcolor: 'rgba(255, 255, 255, 0.2)', borderRadius: '8px', height: '8px' }}>
-                        <Box sx={{ width: `${progress}%`, bgcolor: 'common.white', height: '100%', borderRadius: '8px' }} />
-                      </Box>
-                      <Grid container spacing={1}>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" sx={{ opacity: 0.9 }}>Target</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>₹{goal.goalAmount.toLocaleString()}</Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" sx={{ opacity: 0.9 }}>Invested</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>₹{goal.investedAmount.toLocaleString()}</Typography>
-                        </Grid>
-                      </Grid>
-                      <Box sx={{ position: 'absolute', top: 0, right: 0, width: '40px', height: '40px', 
-                        bgcolor: 'rgba(255, 255, 255, 0.2)', borderRadius: '0 0 0 40px', display: 'flex', 
-                        alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
-                          {Math.round(progress)}%
-                        </Typography>
-                      </Box>
-                    </Paper>
-                  </Grid>
-                );
-              })}
+  {goalsData.map((goal, index) => {
+    const progress = (goal.invested / goal.target) * 100;
+    return (
+      <Grid item xs={12} md={6} lg={4} key={index}>
+        <Paper
+          sx={{
+            p: 2,
+            borderRadius: '12px',
+            background: `linear-gradient(135deg, ${goal.color || '#6B5B95'} 30%, ${goal.color || '#6B5B95'}dd 100%)`,
+            color: 'common.white',
+            textAlign: 'left',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-5px)',
+              boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+            },
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <IconButton
+              sx={{
+                color: 'common.white',
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '10px',
+                p: 1.5,
+              }}
+            >
+              {goal.icon || <MonetizationOn />}
+            </IconButton>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
+                {goal.name}
+              </Typography>
+              <Typography variant="caption" sx={{ opacity: 0.9, fontSize: '0.85rem' }}>
+                {goal.years} years goal
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              mt: 2,
+              mb: 1.5,
+              bgcolor: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '8px',
+              height: '8px',
+            }}
+          >
+            <Box
+              sx={{
+                width: `${progress}%`,
+                bgcolor: 'common.white',
+                height: '100%',
+                borderRadius: '8px',
+              }}
+            />
+          </Box>
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                Target
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                ₹{goal.target.toLocaleString()}
+              </Typography>
             </Grid>
+            <Grid item xs={6}>
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                Invested
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                ₹{goal.invested.toLocaleString()}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '40px',
+              height: '40px',
+              bgcolor: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '0 0 0 40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 700 }}>
+              {Math.round(progress)}%
+            </Typography>
+          </Box>
+        </Paper>
+      </Grid>
+    );
+  })}
+</Grid>
           </Paper>
         </Grid>
       </Grid>

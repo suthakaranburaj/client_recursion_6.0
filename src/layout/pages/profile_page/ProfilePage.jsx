@@ -18,17 +18,26 @@ import {
   IconButton,
   List,
   ListItem,
-  ListItemText,
+  ListItemText
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { save_user_service, get_current_user_service } from "../../../services/authServices/authServices";
-import { buy_subscription, cancel_subscription } from "../../../services/subscriptionServices/subscriptionServices";
-buy_subscription
-import { email_send_otp_services, email_verify_otp_services } from "../../../services/emailServices/emailServices";
+import {
+  save_user_service,
+  get_current_user_service
+} from "../../../services/authServices/authServices";
+import {
+  buy_subscription,
+  cancel_subscription
+} from "../../../services/subscriptionServices/subscriptionServices";
+buy_subscription;
+import {
+  email_send_otp_services,
+  email_verify_otp_services
+} from "../../../services/emailServices/emailServices";
 
 function ProfilePage() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -49,7 +58,7 @@ function ProfilePage() {
     phone: user.phone,
     email: user.email,
     image: user.image,
-    subscription: user.subscription || false,
+    subscription: user.subscription || false
   });
 
   const [editProfileMode, setEditProfileMode] = useState(false);
@@ -78,7 +87,7 @@ function ProfilePage() {
     const { name, value } = e.target;
     setProfileData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
@@ -88,7 +97,7 @@ function ProfilePage() {
       setSelectedImage(file);
       setProfileData((prev) => ({
         ...prev,
-        image: URL.createObjectURL(file),
+        image: URL.createObjectURL(file)
       }));
     }
   };
@@ -151,7 +160,7 @@ function ProfilePage() {
     try {
       const payload = {
         email: profileData.email,
-        otp: verificationOtp,
+        otp: verificationOtp
       };
       const response = await email_verify_otp_services(payload);
 
@@ -237,8 +246,8 @@ function ProfilePage() {
     setIsLoading(true);
     try {
       const formPayload = new FormData();
-      formPayload.append("user_id", user.user_id);
-      formPayload.append("subscription", false);
+      // formPayload.append("user_id", user.user_id);
+      // formPayload.append("subscription", false);
 
       const response = await cancel_subscription();
       if (response.status) {
@@ -261,10 +270,12 @@ function ProfilePage() {
     setIsLoading(true);
     try {
       const formPayload = new FormData();
-      formPayload.append("user", user);
-      formPayload.append("subscription", true);
+      const payload = {
+        is_paid: true
+      };
 
-      const response = await buy_subscription(formPayload);
+      const response = await buy_subscription(payload);
+      console.log(response)
       if (response.status) {
         const updatedUserResponse = await get_current_user_service();
         const updatedUser = updatedUserResponse.data.data;
@@ -306,7 +317,7 @@ function ProfilePage() {
                 height: 150,
                 mx: "auto",
                 border: "2px solid",
-                borderColor: "primary.main",
+                borderColor: "primary.main"
               }}
             />
             {editImageMode ? (
@@ -460,11 +471,7 @@ function ProfilePage() {
 
               {editProfileMode ? (
                 <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                  <Button
-                    variant="contained"
-                    onClick={handleSaveProfile}
-                    disabled={isLoading}
-                  >
+                  <Button variant="contained" onClick={handleSaveProfile} disabled={isLoading}>
                     {isLoading ? <CircularProgress size={24} /> : "Save"}
                   </Button>
                   <Button
@@ -541,7 +548,7 @@ function ProfilePage() {
             </Paper>
           </Grid>
         </Grid>
-
+{/* 
         <Divider sx={{ mt: 4, mb: 4 }} />
 
         <Box sx={{ textAlign: "center" }}>
@@ -550,11 +557,7 @@ function ProfilePage() {
           </Typography>
           <Grid container spacing={2} justifyContent="center">
             <Grid item>
-              <Button
-                variant="outlined"
-                component="label"
-                sx={{ px: 4, py: 2 }}
-              >
+              <Button variant="outlined" component="label" sx={{ px: 4, py: 2 }}>
                 Add Bank Statement
                 <input
                   type="file"
@@ -575,7 +578,7 @@ function ProfilePage() {
               </Button>
             </Grid>
           </Grid>
-        </Box>
+        </Box> */}
       </Paper>
 
       <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)}>
@@ -616,7 +619,8 @@ function ProfilePage() {
                 sx={{
                   p: 2,
                   cursor: "pointer",
-                  border: selectedPlan === "free" ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.12)",
+                  border:
+                    selectedPlan === "free" ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.12)"
                 }}
               >
                 <Typography variant="h6" gutterBottom>
@@ -638,7 +642,8 @@ function ProfilePage() {
                 sx={{
                   p: 2,
                   cursor: "pointer",
-                  border: selectedPlan === "premium" ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.12)",
+                  border:
+                    selectedPlan === "premium" ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.12)"
                 }}
               >
                 <Typography variant="h6" gutterBottom>
