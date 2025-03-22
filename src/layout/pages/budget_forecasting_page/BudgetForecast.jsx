@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
   Grid,
-  Card,
-  CardContent,
+  Paper,
   Typography,
   CircularProgress,
   Alert,
-  useTheme
+  useTheme,
+  ToggleButtonGroup,
+  ToggleButton,
+  Box
 } from "@mui/material";
 import {
   LineChart,
@@ -20,20 +22,30 @@ import {
   Bar
 } from "recharts";
 import { forecast_services } from "../../../services/forcastServices/forcastServices";
+import { asyncHandler } from "../../../helper/commonHelper";
+import { ShowChart, BarChart as BarChartIcon } from "@mui/icons-material";
 
 const formatCurrency = (value) => `₹${value.toFixed(2)}`;
+
+// Chart color scheme
+const CHART_COLORS = {
+  primary: "#6366f1",
+  secondary: "#22d3ee",
+  background: "#f8fafc",
+  grid: "#e2e8f0"
+};
 
 function BudgetForecast() {
   const theme = useTheme();
   const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [chartType, setChartType] = useState("line"); // 'line' or 'bar'
+  const [chartType, setChartType] = useState("line");
 
   useEffect(() => {
     const fetchForecast = async () => {
       try {
-        const response = await forecast_services();
+        const response = await asyncHandler(forecast_services)();
         setForecastData(response.data.data);
       } catch (err) {
         setError(err.message);
@@ -51,28 +63,45 @@ function BudgetForecast() {
     }));
   };
 
+  const handleChartTypeChange = (event, newChartType) => {
+    if (newChartType !== null) setChartType(newChartType);
+  };
+
   if (loading) return <CircularProgress sx={{ display: "block", margin: "2rem auto" }} />;
-  if (error)
-    return (
-      <Alert severity="error" sx={{ margin: 2 }}>
-        {error}
-      </Alert>
-    );
+  if (error) return <Alert severity="error" sx={{ margin: 2 }}>{error}</Alert>;
   if (!forecastData) return null;
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{
-          mb: 4,
-          color: "primary.main",
-          fontWeight: "bold"
-        }}
-      >
-        Budget Forecast
-      </Typography>
+    <Box sx={{ p: 3, bgcolor: CHART_COLORS.background, minHeight: '100vh' }}>
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography variant="h4" sx={{ 
+          fontWeight: '600',
+          color: CHART_COLORS.primary,
+          mb: 1
+        }}>
+          Budget Forecast
+        </Typography>
+        
+        <ToggleButtonGroup
+          value={chartType}
+          exclusive
+          onChange={handleChartTypeChange}
+          sx={{ 
+            bgcolor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.1)'
+          }}
+        >
+          <ToggleButton value="line" sx={{ px: 3 }}>
+            <ShowChart sx={{ mr: 1, color: CHART_COLORS.primary }} />
+            Line
+          </ToggleButton>
+          <ToggleButton value="bar" sx={{ px: 3 }}>
+            <BarChartIcon sx={{ mr: 1, color: CHART_COLORS.primary }} />
+            Bar
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
       <Grid container spacing={3}>
         {forecastData.map((category) => {
@@ -80,101 +109,116 @@ function BudgetForecast() {
 
           return (
             <Grid item xs={12} md={6} lg={4} key={category.category}>
-              <Card
-                sx={{
-                  height: "100%",
-                  boxShadow: 3,
-                  transition: "transform 0.3s",
-                  "&:hover": { transform: "scale(1.02)" }
-                }}
-              >
-                <CardContent>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mb: 2,
-                      color: "white",
-                      backgroundColor: "primary.main",
-                      p: 1,
-                      borderRadius: 1
-                    }}
-                  >
-                    {category.category}
-                  </Typography>
+              <Paper sx={{
+                p: 2,
+                height: '100%',
+                borderRadius: '12px',
+                bgcolor: 'white',
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.08)',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)'
+                }
+              }}>
+                <Typography variant="h6" sx={{
+                  mb: 2,
+                  color: CHART_COLORS.primary,
+                  fontWeight: '600',
+                  textAlign: 'center'
+                }}>
+                  {category.category}
+                </Typography>
 
-                  <div style={{ height: 300 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      {chartType === "line" ? (
-                        <LineChart data={chartData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" tick={{ fill: theme.palette.text.primary }} />
-                          <YAxis
-                            tickFormatter={(value) => `₹${value}`}
-                            tick={{ fill: theme.palette.text.primary }}
-                          />
-                          <Tooltip
-                            formatter={(value) => formatCurrency(value)}
-                            contentStyle={{
-                              backgroundColor: theme.palette.background.paper,
-                              border: `1px solid ${theme.palette.divider}`,
-                              borderRadius: theme.shape.borderRadius
-                            }}
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="amount"
-                            stroke={theme.palette.primary.main}
-                            strokeWidth={2}
-                            dot={{ fill: theme.palette.primary.dark }}
-                          />
-                        </LineChart>
-                      ) : (
-                        <BarChart data={chartData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" tick={{ fill: theme.palette.text.primary }} />
-                          <YAxis
-                            tickFormatter={(value) => `₹${value}`}
-                            tick={{ fill: theme.palette.text.primary }}
-                          />
-                          <Tooltip
-                            formatter={(value) => formatCurrency(value)}
-                            contentStyle={{
-                              backgroundColor: theme.palette.background.paper,
-                              border: `1px solid ${theme.palette.divider}`,
-                              borderRadius: theme.shape.borderRadius
-                            }}
-                          />
-                          <Bar
-                            dataKey="amount"
-                            fill={theme.palette.primary.main}
-                            radius={[4, 4, 0, 0]}
-                          />
-                        </BarChart>
-                      )}
-                    </ResponsiveContainer>
-                  </div>
+                <Box sx={{ height: 250 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    {chartType === "line" ? (
+                      <LineChart data={chartData}>
+                        <defs>
+                          <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0.2}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+                        <XAxis 
+                          dataKey="day" 
+                          tick={{ fill: CHART_COLORS.primary }}
+                        />
+                        <YAxis
+                          tickFormatter={(value) => `₹${value}`}
+                          tick={{ fill: CHART_COLORS.primary }}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            borderRadius: '8px',
+                            border: `1px solid ${CHART_COLORS.grid}`,
+                            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.1)',
+                            backgroundColor: 'white'
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="amount"
+                          stroke={CHART_COLORS.primary}
+                          strokeWidth={2}
+                          dot={{ fill: CHART_COLORS.secondary }}
+                        />
+                      </LineChart>
+                    ) : (
+                      <BarChart data={chartData}>
+                        <defs>
+                          <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={CHART_COLORS.secondary} stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor={CHART_COLORS.secondary} stopOpacity={0.2}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+                        <XAxis 
+                          dataKey="day" 
+                          tick={{ fill: CHART_COLORS.primary }}
+                        />
+                        <YAxis
+                          tickFormatter={(value) => `₹${value}`}
+                          tick={{ fill: CHART_COLORS.primary }}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            borderRadius: '8px',
+                            border: `1px solid ${CHART_COLORS.grid}`,
+                            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.1)',
+                            backgroundColor: 'white'
+                          }}
+                        />
+                        <Bar
+                          dataKey="amount"
+                          fill="url(#barGradient)"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                </Box>
 
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mt: 2,
-                      fontWeight: "bold",
-                      color: "success.main",
-                      textAlign: "center",
-                      p: 1,
-                      backgroundColor: "action.hover",
-                      borderRadius: 1
-                    }}
-                  >
+                <Box sx={{
+                  mt: 2,
+                  p: 2,
+                  borderRadius: '8px',
+                  bgcolor: CHART_COLORS.grid,
+                  textAlign: 'center'
+                }}>
+                  <Typography variant="body1" sx={{ 
+                    fontWeight: '600',
+                    color: CHART_COLORS.primary
+                  }}>
                     Weekly Total: {formatCurrency(category.total_predicted_next_week)}
                   </Typography>
-                </CardContent>
-              </Card>
+                </Box>
+              </Paper>
             </Grid>
           );
         })}
       </Grid>
-    </div>
+    </Box>
   );
 }
 
