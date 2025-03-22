@@ -261,10 +261,13 @@ function ProfilePage() {
     setIsLoading(true);
     try {
       const formPayload = new FormData();
-      formPayload.append("user", user);
-      formPayload.append("subscription", true);
+      // formPayload.append("user", user);
+      // formPayload.append("is_paid", true);
+      const payload = { 
+        is_paid : true
+      }
 
-      const response = await buy_subscription(formPayload);
+      const response = await buy_subscription(payload);
       if (response.status) {
         const updatedUserResponse = await get_current_user_service();
         const updatedUser = updatedUserResponse.data.data;
@@ -541,7 +544,7 @@ function ProfilePage() {
             </Paper>
           </Grid>
         </Grid>
-
+{/* 
         <Divider sx={{ mt: 4, mb: 4 }} />
 
         <Box sx={{ textAlign: "center" }}>
@@ -575,7 +578,7 @@ function ProfilePage() {
               </Button>
             </Grid>
           </Grid>
-        </Box>
+        </Box> */}
       </Paper>
 
       <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)}>
