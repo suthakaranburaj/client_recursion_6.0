@@ -8,4 +8,6 @@ const STATEMENT = `${VITE_SERVER_URL}/statements`
 
 const NOTIFICATION = `${VITE_SERVER_URL}/notification`
 
-export { AUTH, EMAIL, STATEMENT, NOTIFICATION };
+const TRANSACTION = `${VITE_SERVER_URL}/statements`
+
+export { AUTH, EMAIL, STATEMENT, NOTIFICATION,TRANSACTION };
