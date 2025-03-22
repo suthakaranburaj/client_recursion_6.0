@@ -9,6 +9,7 @@ const TRANSACTION_HISTORY = "/history"
 const BUDGETFORECAST = "/budget-forecast"
 const UPLOADPDF = "/pdf"
 const ADDGOAL = "/add-goal"
+const ADVANCE_CHATBOT="/advance-chatbot"
 
 export {
   HOMEPAGE,
@@ -20,5 +21,6 @@ export {
   TRANSACTION_HISTORY,
   BUDGETFORECAST,
   UPLOADPDF,
-  ADDGOAL
+  ADDGOAL,
+  ADVANCE_CHATBOT,
 };

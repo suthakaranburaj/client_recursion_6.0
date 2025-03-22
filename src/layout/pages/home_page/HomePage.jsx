@@ -88,7 +88,7 @@ const NAVIGATION = [
   //       icon: <DescriptionIcon />,
   //       path: ""
   // }
-  ,
+  
   {
     segment: "history",
     title: "Transaction History",
@@ -106,6 +106,12 @@ const NAVIGATION = [
     title: "Add Goals",
     icon: <EmojiEventsIcon />,
     path: "/add-goal"
+  },
+  {
+    segment: "/advance-chatbot",
+    title: "Advanced Chatbot",
+    icon: <EmojiEventsIcon />,
+    path: "/advance-chatbot"
   }
 ];
 
