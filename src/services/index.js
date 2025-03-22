@@ -7,5 +7,5 @@ const EMAIL = `${VITE_SERVER_URL}/email`;
 const STATEMENT = `${VITE_SERVER_URL}/statements`
 
 const NOTIFICATION = `${VITE_SERVER_URL}/notification`
-
-export { AUTH, EMAIL, STATEMENT, NOTIFICATION };
+const SUBS = `${VITE_SERVER_URL}/subscription`;
+export { AUTH,SUBS, EMAIL, STATEMENT, NOTIFICATION };

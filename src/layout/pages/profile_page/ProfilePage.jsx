@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -15,12 +15,19 @@ import {
   DialogTitle,
   DialogContent,
   Stack,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { save_user_service, get_current_user_service } from "../../../services/authServices/authServices";
+import { buy_subscription, cancel_subscription } from "../../../services/subscriptionServices/subscriptionServices";
+buy_subscription
 import { email_send_otp_services, email_verify_otp_services } from "../../../services/emailServices/emailServices";
 
 function ProfilePage() {
@@ -42,6 +49,7 @@ function ProfilePage() {
     phone: user.phone,
     email: user.email,
     image: user.image,
+    subscription: user.subscription || false,
   });
 
   const [editProfileMode, setEditProfileMode] = useState(false);
@@ -57,6 +65,8 @@ function ProfilePage() {
   const [toastSeverity, setToastSeverity] = useState("info");
   const [selectedImage, setSelectedImage] = useState(null);
   const [bankStatementFile, setBankStatementFile] = useState(null);
+  const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   const showToast = (message, severity = "error") => {
     setToastMessage(message);
@@ -223,6 +233,55 @@ function ProfilePage() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    setIsLoading(true);
+    try {
+      const formPayload = new FormData();
+      formPayload.append("user_id", user.user_id);
+      formPayload.append("subscription", false);
+
+      const response = await cancel_subscription();
+      if (response.status) {
+        const updatedUserResponse = await get_current_user_service();
+        const updatedUser = updatedUserResponse.data.data;
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setProfileData((prev) => ({ ...prev, subscription: false }));
+        showToast("Subscription cancelled successfully", "success");
+      } else {
+        showToast(response.message || "Failed to cancel subscription");
+      }
+    } catch (error) {
+      showToast("Failed to cancel subscription");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleProceedToPayment = async () => {
+    setIsLoading(true);
+    try {
+      const formPayload = new FormData();
+      formPayload.append("user", user);
+      formPayload.append("subscription", true);
+
+      const response = await buy_subscription(formPayload);
+      if (response.status) {
+        const updatedUserResponse = await get_current_user_service();
+        const updatedUser = updatedUserResponse.data.data;
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setProfileData((prev) => ({ ...prev, subscription: true }));
+        setSubscriptionDialogOpen(false);
+        showToast("Premium subscription activated!", "success");
+      } else {
+        showToast(response.message || "Failed to activate subscription");
+      }
+    } catch (error) {
+      showToast("Failed to activate subscription");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
@@ -382,19 +441,29 @@ function ProfilePage() {
                 )}
               </Box>
 
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
+                  Subscription
+                </Typography>
+                {editProfileMode ? (
+                  <TextField
+                    value={profileData.subscription ? "Finance Tracker Premium" : "Free version"}
+                    disabled
+                    fullWidth
+                  />
+                ) : (
+                  <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                    {profileData.subscription ? "Finance Tracker Premium" : "Free version"}
+                  </Typography>
+                )}
+              </Box>
+
               {editProfileMode ? (
-                <Box sx={{ mt: 2 }}>
+                <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                   <Button
                     variant="contained"
                     onClick={handleSaveProfile}
-                    disabled={
-                      isLoading ||
-                      (profileData.email === user.email &&
-                        profileData.name === user.name &&
-                        profileData.username === user.username &&
-                        profileData.phone === user.phone)
-                    }
-                    sx={{ mr: 2 }}
+                    disabled={isLoading}
                   >
                     {isLoading ? <CircularProgress size={24} /> : "Save"}
                   </Button>
@@ -409,18 +478,35 @@ function ProfilePage() {
                     variant="outlined"
                     startIcon={<DeleteIcon />}
                     onClick={() => alert("Delete Account")}
-                    sx={{ ml: 2 }}
                   >
                     Delete Account
                   </Button>
-                </Box>
+                  {profileData.subscription ? (
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      onClick={handleCancelSubscription}
+                      disabled={isLoading}
+                    >
+                      Cancel Subscription
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => setSubscriptionDialogOpen(true)}
+                      disabled={isLoading}
+                    >
+                      Buy Subscription
+                    </Button>
+                  )}
+                </Stack>
               ) : (
-                <Box>
+                <Stack direction="row" spacing={2}>
                   <Button
                     variant="contained"
                     startIcon={<EditIcon />}
                     onClick={() => setEditProfileMode(true)}
-                    sx={{ mr: 2 }}
                   >
                     Edit Profile
                   </Button>
@@ -431,7 +517,26 @@ function ProfilePage() {
                   >
                     Delete Account
                   </Button>
-                </Box>
+                  {profileData.subscription ? (
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      onClick={handleCancelSubscription}
+                      disabled={isLoading}
+                    >
+                      Cancel Subscription
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => setSubscriptionDialogOpen(true)}
+                      disabled={isLoading}
+                    >
+                      Buy Subscription
+                    </Button>
+                  )}
+                </Stack>
               )}
             </Paper>
           </Grid>
@@ -491,6 +596,82 @@ function ProfilePage() {
             </Stack>
           </DialogContent>
         </Box>
+      </Dialog>
+
+      <Dialog open={subscriptionDialogOpen} onClose={() => setSubscriptionDialogOpen(false)}>
+        <DialogTitle>
+          Choose Your Plan
+          <IconButton
+            onClick={() => setSubscriptionDialogOpen(false)}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={6}>
+              <Paper
+                onClick={() => setSelectedPlan("free")}
+                sx={{
+                  p: 2,
+                  cursor: "pointer",
+                  border: selectedPlan === "free" ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.12)",
+                }}
+              >
+                <Typography variant="h6" gutterBottom>
+                  Free Plan
+                </Typography>
+                <List dense>
+                  <ListItem>
+                    <ListItemText primary="✓ Limited PDF statements allowed" />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="✗ No advanced chatbot" />
+                  </ListItem>
+                </List>
+              </Paper>
+            </Grid>
+            <Grid item xs={6}>
+              <Paper
+                onClick={() => setSelectedPlan("premium")}
+                sx={{
+                  p: 2,
+                  cursor: "pointer",
+                  border: selectedPlan === "premium" ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.12)",
+                }}
+              >
+                <Typography variant="h6" gutterBottom>
+                  Finance Tracker Premium
+                </Typography>
+                <List dense>
+                  <ListItem>
+                    <ListItemText primary="✓ Advanced chatbot" />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="✓ Unlimited PDF statements" />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="✓ Alert budget system" />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="✓ Budget forecast" />
+                  </ListItem>
+                </List>
+              </Paper>
+            </Grid>
+          </Grid>
+          <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+            <Button onClick={() => setSubscriptionDialogOpen(false)}>Cancel</Button>
+            <Button
+              variant="contained"
+              disabled={selectedPlan !== "premium"}
+              onClick={handleProceedToPayment}
+            >
+              Proceed to Payment
+            </Button>
+          </Box>
+        </DialogContent>
       </Dialog>
 
       <Snackbar
