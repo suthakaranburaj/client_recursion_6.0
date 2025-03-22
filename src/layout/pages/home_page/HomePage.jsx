@@ -12,22 +12,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import CloudCircleIcon from "@mui/icons-material/CloudCircle";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout, ThemeSwitcher } from "@toolpad/core/DashboardLayout";
-import Chip from "@mui/material/Chip";
-import {
-  Box,
-
-  Avatar,
-  Paper,
-  Container,
-  Grid,
-  Button,
- 
-
-  CircularProgress,
-  Snackbar,
-  
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
@@ -36,15 +21,6 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import LayersIcon from "@mui/icons-material/Layers";
 import SearchIcon from "@mui/icons-material/Search";
 import TextField from "@mui/material/TextField";
-import LockIcon from '@mui/icons-material/Lock';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
-import BoltIcon from '@mui/icons-material/Bolt';
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import { asyncHandler, getCookie } from "../../../helper/commonHelper.js";
 import {
   login_service,
@@ -81,6 +57,12 @@ const NAVIGATION = [
     icon: <Person4Icon />,
     path: "/profile"
   },
+  // {
+  //   segment: "stocks",
+  //   title: "Stocks",
+  //   icon: <ShowChartIcon />,
+  //   path: "/stocks"
+  // },
   {
     kind: "divider"
   },
@@ -89,16 +71,16 @@ const NAVIGATION = [
     title: "Analytics"
   },
   {
-    segment: "budget-forecast",
-    title: "Budget forecast",
-    icon: <CurrencyRupeeIcon />,
-    path: "/budget-forecast"
+        segment: "budget-forecast",
+        title: "Budget forecast",
+        icon: <CurrencyRupeeIcon />,
+        path: "/budget-forecast"
   },
   {
-    segment: "chatbot",
-    title: "Chatbot",
-    icon: <SmartToyIcon />,
-    path: "/chatbot"
+        segment: "chatbot",
+        title: "Chatbot",
+        icon: <SmartToyIcon />,
+        path: "/chatbot"
   },
   // {
   //       segment: "insurances",
@@ -106,7 +88,7 @@ const NAVIGATION = [
   //       icon: <DescriptionIcon />,
   //       path: ""
   // }
-  
+  ,
   {
     segment: "history",
     title: "Transaction History",
@@ -116,7 +98,7 @@ const NAVIGATION = [
   {
     segment: "pdf",
     title: "Statements",
-    icon: <HistoryIcon />,
+    icon: <ReceiptLongIcon />,
     path: "/pdf"
   },
   {
@@ -124,12 +106,6 @@ const NAVIGATION = [
     title: "Add Goals",
     icon: <EmojiEventsIcon />,
     path: "/add-goal"
-  },
-  {
-    segment: "advance-chatbot",
-    title: "Advanced Chatbot",
-    icon: <EmojiEventsIcon />,
-    path: "/advance-chatbot"
   }
 ];
 
@@ -164,8 +140,15 @@ function AccountSidebarPreview(props) {
 }
 
 AccountSidebarPreview.propTypes = {
+  /**
+   * The handler used when the preview is expanded
+   */
   handleClick: PropTypes.func,
   mini: PropTypes.bool.isRequired,
+  /**
+   * The state of the Account popover
+   * @default false
+   */
   open: PropTypes.bool
 };
 
@@ -236,8 +219,7 @@ const demoSession = {
   user: {
     name: "Bharat Kashyap",
     email: "bharatkashyap@outlook.com",
-    image: "https://avatars.githubusercontent.com/u/19550456",
-    subscription: false // Added subscription status
+    image: "https://avatars.githubusercontent.com/u/19550456"
   }
 };
 
@@ -246,6 +228,10 @@ function CustomAppTitle() {
     <Stack direction="row" alignItems="center" spacing={2}>
       <CloudCircleIcon fontSize="large" color="primary" />
       <Typography variant="h6">Your Finance Tracker</Typography>
+      {/* <Chip size="small" label="BETA" color="info" />
+      <Tooltip title="Connected to production">
+        <CheckCircleIcon color="success" fontSize="small" />
+      </Tooltip> */}
     </Stack>
   );
 }
@@ -315,11 +301,10 @@ function DashboardLayoutAccountSidebar(props) {
   const { window } = props;
 
   const location = useLocation();
-  const [pathname, setPathname] = React.useState("/dashboard");
-  const navigate = useNavigate();
 
-  const [subscriptionDialogOpen, setSubscriptionDialogOpen] = React.useState(false);
-  const [selectedPlan, setSelectedPlan] = React.useState(null);
+  const [pathname, setPathname] = React.useState("/dashboard");
+
+  const navigate = useNavigate();
 
   const router = React.useMemo(() => {
     return {
@@ -329,13 +314,15 @@ function DashboardLayoutAccountSidebar(props) {
     };
   }, [navigate, location]);
 
+  // Remove this const when copying and pasting into your project.
   const demoWindow = window !== undefined ? window() : undefined;
 
   const [session, setSession] = React.useState(null);
   const [authView, setAuthView] = React.useState(null);
-
   React.useEffect(() => {
+    // console.log('hee2')
     const checkUser = async () => {
+      // console.log('hell1')
       await handle_get_user();
     };
     checkUser();
@@ -353,72 +340,44 @@ function DashboardLayoutAccountSidebar(props) {
       const response = await get_current_user_service();
       const statementresponse = await get_current_statement_service();
       if (response.data.data) {
+        // console.log('heelo')
         setSession({
           user: response.data.data
         });
-        localStorage.setItem("user", JSON.stringify(response.data.data));
+       localStorage.setItem("user", JSON.stringify(response.data.data));
         localStorage.setItem("statement", JSON.stringify(statementresponse.data.data));
+        
       }
+      // console.log("response", response.data.data);
+      // console.log("2nd response",statementresponse.data.data);
+      
     } catch (error) {
       console.error("Error fetching user:", error);
       setSession(null);
     }
   };
-
-  const handleBudgetForecastClick = () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user?.subscription) {
-      setSubscriptionDialogOpen(true); // Open subscription dialog if subscription is false
-    } else {
-      navigate("/budget-forecast"); // Navigate to budget forecast if subscription is true
-    }
-  };
-
-  const handleProceedToPayment = () => {
-    const updatedUser = { ...session.user, subscription: true };
-    setSession({ user: updatedUser });
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    setSubscriptionDialogOpen(false);
-  };
+  const authentication = React.useMemo(() => {
+    return {
+      signIn: () => {
+        setSession(demoSession);
+      },
+      signOut: () => {
+        setSession(null);
+      }
+    };
+  }, []);
 
   return (
     <AppProvider
-      navigation={NAVIGATION.map((item) => {
-        if (item.segment === "budget-forecast") {
-          const user = JSON.parse(localStorage.getItem("user"));
-          return {
-            ...item,
-            title: (
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <span>{item.title}</span>
-                {user?.subscription ? <LockOpenIcon fontSize="small" /> : <LockIcon fontSize="small" />}
-              </Stack>
-            ),
-            onClick: handleBudgetForecastClick
-          };
-        }
-        if (item.segment === "chatbot") {
-          const user = JSON.parse(localStorage.getItem("user"));
-          return {
-            ...item,
-            title: (
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <span>{item.title}</span>
-                {user?.subscription && <BoltIcon fontSize="small" />}
-              </Stack>
-            )
-          };
-        }
-        return item;
-      })}
+      navigation={NAVIGATION}
       router={router}
       theme={demoTheme}
       window={demoWindow}
       authentication={{
-        signIn: () => setAuthView("login"),
+        signIn: () => setAuthView("login"), // Refresh user data on sign-in
         signOut: async () => {
           await logout_service();
-          localStorage.removeItem('statements');
+          localStorage.removeItem('statements')
           setSession(null);
           setTimeout(() => {
             globalThis.location.reload();
@@ -426,6 +385,14 @@ function DashboardLayoutAccountSidebar(props) {
         }
       }}
       session={session?.user ? session : null}
+      // slots={{
+      //   login: () => (
+      //     <Pages.Login
+      //       onSwitchToRegister={() => setAuthView("register")}
+      //       onClose={() => setAuthView(null)}
+      //     />
+      //   )
+      // }}
       components={{
         MenuItem: CustomMenuItem
       }}
@@ -437,86 +404,9 @@ function DashboardLayoutAccountSidebar(props) {
           sidebarFooter: SidebarFooterAccount
         }}
       >
+        {/* <DemoPageContent pathname={pathname} /> */}
         <Outlet />
       </DashboardLayout>
-
-      {/* Subscription Dialog */}
-      <Dialog open={subscriptionDialogOpen} onClose={() => setSubscriptionDialogOpen(false)}>
-        <DialogTitle>
-          Choose Your Plan
-          <IconButton
-            onClick={() => setSubscriptionDialogOpen(false)}
-            sx={{ position: "absolute", right: 8, top: 8 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={6}>
-              <Paper
-                onClick={() => setSelectedPlan("free")}
-                sx={{
-                  p: 2,
-                  cursor: "pointer",
-                  border: selectedPlan === "free" ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.12)",
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  Free Plan
-                </Typography>
-                <List dense>
-                  <ListItem>
-                    <ListItemText primary="✓ Limited PDF statements allowed" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="✗ No advanced chatbot" />
-                  </ListItem>
-                </List>
-              </Paper>
-            </Grid>
-            <Grid item xs={6}>
-              <Paper
-                onClick={() => setSelectedPlan("premium")}
-                sx={{
-                  p: 2,
-                  cursor: "pointer",
-                  border: selectedPlan === "premium" ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.12)",
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  Finance Tracker Premium
-                </Typography>
-                <List dense>
-                  <ListItem>
-                    <ListItemText primary="✓ Advanced chatbot" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="✓ Unlimited PDF statements" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="✓ Alert budget system" />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="✓ Budget forecast" />
-                  </ListItem>
-                </List>
-              </Paper>
-            </Grid>
-          </Grid>
-          <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Button onClick={() => setSubscriptionDialogOpen(false)}>Cancel</Button>
-            <Button
-              variant="contained"
-              disabled={selectedPlan !== "premium"}
-              onClick={handleProceedToPayment}
-            >
-              Proceed to Payment
-            </Button>
-          </Box>
-        </DialogContent>
-      </Dialog>
-
       {authView === "login" && (
         <Pages.Login
           onSwitchToRegister={() => setAuthView("register")}
@@ -540,6 +430,10 @@ function DashboardLayoutAccountSidebar(props) {
 }
 
 DashboardLayoutAccountSidebar.propTypes = {
+  /**
+   * Injected by the documentation to work in an iframe.
+   * Remove this when copying and pasting into your project.
+   */
   window: PropTypes.func
 };
 
