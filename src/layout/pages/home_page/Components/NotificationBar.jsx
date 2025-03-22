@@ -51,7 +51,7 @@ const NotificationBar = () => {
     // Mark all notifications as read
     const updatedNotifications = notifications.map((notification) => ({
       ...notification,
-      read: true,
+      is_read: true, // Update the `is_read` attribute
     }));
 
     // Update the state to reflect read notifications
@@ -70,7 +70,7 @@ const NotificationBar = () => {
   const id = open ? "notification-popover" : undefined;
 
   // Count unread notifications
-  const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const unreadCount = notifications.filter((notification) => !notification.is_read).length;
 
   return (
     <Stack spacing={2} direction="row" alignItems="center" sx={{ mr: 1 }}>
@@ -135,13 +135,13 @@ const NotificationBar = () => {
                   p: 1,
                   mb: 1,
                   borderRadius: "4px",
-                  backgroundColor: notification.read ? "background.paper" : "action.hover",
+                  backgroundColor: notification.is_read ? "background.paper" : "action.hover",
                   border: "1px solid",
                   borderColor: "divider",
                   position: "relative",
                 }}
               >
-                {!notification.read && (
+                {!notification.is_read && (
                   <Box
                     sx={{
                       position: "absolute",
@@ -158,6 +158,9 @@ const NotificationBar = () => {
                   </Box>
                 )}
                 <Typography variant="body1">{notification.message}</Typography>
+                <Typography variant="caption" color="textSecondary">
+                  {new Date(notification.createdAt).toLocaleString()}
+                </Typography>
               </Box>
             ))
           )}
