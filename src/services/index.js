@@ -8,4 +8,6 @@ const STATEMENT = `${VITE_SERVER_URL}/statements`
 
 const NOTIFICATION = `${VITE_SERVER_URL}/notification`
 
-export { AUTH, EMAIL, STATEMENT, NOTIFICATION };
+const FORCAST = `http://127.0.0.1:8000/api/predict-spends/`;
+
+export { AUTH, EMAIL, STATEMENT, NOTIFICATION, FORCAST };

@@ -108,7 +108,7 @@ const NAVIGATION = [
     path: "/add-goal"
   },
   {
-    segment: "/advance-chatbot",
+    segment: "advance-chatbot",
     title: "Advanced Chatbot",
     icon: <EmojiEventsIcon />,
     path: "/advance-chatbot"
