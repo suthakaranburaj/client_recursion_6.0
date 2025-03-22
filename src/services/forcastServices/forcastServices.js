@@ -3,7 +3,7 @@ import { apiClient } from "../../helper/commonHelper.js";
 import { FORCAST } from "../index.js";
 import { asyncHandler } from "../../helper/commonHelper.js";
 
-export const forcast_services = asyncHandler(async () => {
+export const forecast_services = asyncHandler(async () => {
   return await apiClient.get(`${FORCAST}`);
 });
 

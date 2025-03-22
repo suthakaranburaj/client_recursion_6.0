@@ -104,7 +104,7 @@ const AdvancedChatbot = () => {
       {response && (
         <div style={{ marginTop: '20px' }}>
           <h3>Response:</h3>
-          <p>{response}</p>
+          <pre style={{ background: '#f4f4f4', padding: '10px' }}>{response}</pre>
         </div>
       )}
       {error && (
