@@ -10,6 +10,9 @@ const NOTIFICATION = `${VITE_SERVER_URL}/notification`
 const SUBS = `${VITE_SERVER_URL}/subscription`;
 const TRANSACTION = `${VITE_SERVER_URL}/statements`
 
+const GOAL = `${VITE_SERVER_URL}/goals`
+
 const FORCAST = `${VITE_SERVER_URL}/statements/add_tt`;
 
-export { AUTH,SUBS, EMAIL, STATEMENT, NOTIFICATION,TRANSACTION, FORCAST };
+
+export { AUTH,SUBS, EMAIL, STATEMENT, NOTIFICATION,TRANSACTION, FORCAST,GOAL };
