@@ -7,7 +7,7 @@ import * as Routes from "./routes/index.js";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"; // Import Navigate
 import NotFoundPage from "./layout/components/NotFoundPage";
 import { AuthGuard } from "./layout/components/AuthGuard";
-
+import AdvancedChatbot from "./layout/pages/chatbot_page/Advanced_chatbot";
 const router = createBrowserRouter([
   {
     path: Routes.HOMEPAGE,
@@ -28,41 +28,67 @@ const router = createBrowserRouter([
       {
         path: Routes.PROFILE,
         element: (
-            <AuthGuard><Pages.ProfilePage /></AuthGuard>  
+          <AuthGuard>
+            <Pages.ProfilePage />
+          </AuthGuard>
         )
       },
       {
         path: Routes.BUDGETFORECAST,
-        element:(<AuthGuard><Pages.BudgetForecast /> </AuthGuard>)
+        element: (
+          <AuthGuard>
+            <Pages.BudgetForecast />{" "}
+          </AuthGuard>
+        )
       },
       {
         path: Routes.CHATBOT,
-        element:(<AuthGuard> <Pages.Chatbot /> </AuthGuard>)
+        element: (
+          <AuthGuard>
+            {" "}
+            <Pages.Chatbot />{" "}
+          </AuthGuard>
+        )
       },
       {
         path: Routes.TRANSACTION_HISTORY,
-        element:(<AuthGuard><Pages.TransactionHistory /> </AuthGuard>)
+        element: (
+          <AuthGuard>
+            <Pages.TransactionHistory />{" "}
+          </AuthGuard>
+        )
       },
       {
         path: Routes.UPLOADPDF,
-        element:(<AuthGuard><Pages.PdfUpload /> </AuthGuard>)
+        element: (
+          <AuthGuard>
+            <Pages.PdfUpload />{" "}
+          </AuthGuard>
+        )
       },
       {
         path: Routes.ADDGOAL,
-        element:(<AuthGuard><Pages.AddGoal /> </AuthGuard>)
+        element: (
+          <AuthGuard>
+            <Pages.AddGoal />{" "}
+          </AuthGuard>
+        )
       },
+      {
+        path: Routes.ADVANCE_CHATBOT,
+        element: <AdvancedChatbot />
+      }
     ]
   },
   {
     path: Routes.LOGIN,
-    element: (
-        <Pages.Login />
-    )
+    element: <Pages.Login />
   },
   {
     path: Routes.REGISTER,
     element: <Pages.Register />
   },
+
   {
     path: "*",
     element: <NotFoundPage />
