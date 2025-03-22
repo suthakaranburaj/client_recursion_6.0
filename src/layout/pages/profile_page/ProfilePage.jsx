@@ -548,7 +548,7 @@ function ProfilePage() {
             </Paper>
           </Grid>
         </Grid>
-
+{/* 
         <Divider sx={{ mt: 4, mb: 4 }} />
 
         <Box sx={{ textAlign: "center" }}>
@@ -578,7 +578,7 @@ function ProfilePage() {
               </Button>
             </Grid>
           </Grid>
-        </Box>
+        </Box> */}
       </Paper>
 
       <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)}>

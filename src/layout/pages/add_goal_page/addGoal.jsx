@@ -12,7 +12,8 @@ import {
   TextField,
   IconButton,
   styled,
-  Box
+  Box,
+  Snackbar
 } from '@mui/material';
 import {
   Close,
@@ -26,6 +27,7 @@ import {
   AddCircle
 } from '@mui/icons-material';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { add_goal_service } from '../../../services/goalServices/goalservices'; // Import the service
 
 const ColorButton = styled(Button)(({ theme, color }) => ({
   color: theme.palette.getContrastText(color),
@@ -82,6 +84,9 @@ const AddGoal = () => {
   });
 
   const [chartData, setChartData] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   useEffect(() => {
     const { monthlyInvestment, period, interestRate } = formData;
@@ -117,9 +122,29 @@ const AddGoal = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
-    handleClose();
-    alert(`Goal Saved: ${formData.goalName}`);
+  const handleSave = async () => {
+    const payload = {
+      name: formData.goalName,
+      years: formData.period,
+      target: calculations.total,
+      invested: calculations.invested
+    };
+
+    try {
+      const response = await add_goal_service(payload);
+      setSnackbarMessage('Goal saved successfully!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      handleClose();
+    } catch (error) {
+      setSnackbarMessage('Failed to save goal. Please try again.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   const COLORS = ['#0088FE', '#00C49F'];
@@ -177,188 +202,228 @@ const AddGoal = () => {
       </Grid>
 
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          background: selectedGoal?.color ? `linear-gradient(135deg, ${selectedGoal.color} 30%, ${selectedGoal.color}dd 100%)` : '#2A363B',
-          color: 'common.white',
-          py: 2
-        }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {selectedGoal?.name === 'Custom Goal' ? formData.goalName : selectedGoal?.name}
-          </Typography>
-          <IconButton onClick={handleClose} sx={{ color: 'common.white' }}>
-            <Close />
-          </IconButton>
-        </DialogTitle>
+  <DialogTitle
+    sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      background: selectedGoal?.color
+        ? `linear-gradient(135deg, ${selectedGoal.color} 30%, ${selectedGoal.color}dd 100%)`
+        : (theme) => theme.palette.mode === 'dark' ? '#2A363B' : '#2A363B',
+      color: 'common.white',
+      py: 2,
+    }}
+  >
+    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+      {selectedGoal?.name === 'Custom Goal' ? formData.goalName : selectedGoal?.name}
+    </Typography>
+    <IconButton onClick={handleClose} sx={{ color: 'common.white' }}>
+      <Close />
+    </IconButton>
+  </DialogTitle>
 
-        <DialogContent>
-          <Box sx={{ mt: 3 }}>
-            {selectedGoal?.name === 'Custom Goal' && (
-              <TextField
-                fullWidth
-                label="Goal Name"
-                variant="outlined"
-                name="goalName"
-                value={formData.goalName}
-                onChange={handleChange}
-                sx={{ mb: 3 }}
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            )}
+  <DialogContent>
+    <Box sx={{ mt: 3 }}>
+      {selectedGoal?.name === 'Custom Goal' && (
+        <TextField
+          fullWidth
+          label="Goal Name"
+          variant="outlined"
+          name="goalName"
+          value={formData.goalName}
+          onChange={handleChange}
+          sx={{ mb: 3 }}
+          InputProps={{
+            sx: { borderRadius: '8px' },
+          }}
+        />
+      )}
 
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 2 }}>
-              Investment Period (Years)
-            </Typography>
-            <Slider
-              value={formData.period}
-              onChange={(e, value) => setFormData({ ...formData, period: value })}
-              min={1}
-              max={25}
-              step={1}
-              valueLabelDisplay="auto"
-              marks={[
-                { value: 1, label: '1Y' },
-                { value: 5, label: '5Y' },
-                { value: 10, label: '10Y' },
-                { value: 25, label: '25Y' }
-              ]}
-              sx={{ 
-                mb: 3,
-                '& .MuiSlider-thumb': {
-                  backgroundColor: selectedGoal?.color || '#2A363B'
-                }
-              }}
-            />
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 2 }}>
+        Investment Period (Years)
+      </Typography>
+      <Slider
+        value={formData.period}
+        onChange={(e, value) => setFormData({ ...formData, period: value })}
+        min={1}
+        max={25}
+        step={1}
+        valueLabelDisplay="auto"
+        marks={[
+          { value: 1, label: '1Y' },
+          { value: 5, label: '5Y' },
+          { value: 10, label: '10Y' },
+          { value: 25, label: '25Y' },
+        ]}
+        sx={{
+          mb: 3,
+          '& .MuiSlider-thumb': {
+            backgroundColor: selectedGoal?.color || '#2A363B',
+          },
+        }}
+      />
 
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Expected Annual Returns (%)
-            </Typography>
-            <Slider
-              value={formData.interestRate}
-              onChange={(e, value) => setFormData({ ...formData, interestRate: value })}
-              min={1}
-              max={30}
-              step={0.5}
-              valueLabelDisplay="auto"
-              valueLabelFormat={(value) => `${value}%`}
-              marks={[
-                { value: 1, label: '1%' },
-                { value: 10, label: '10%' },
-                { value: 20, label: '20%' },
-                { value: 30, label: '30%' }
-              ]}
-              sx={{ 
-                mb: 3,
-                '& .MuiSlider-thumb': {
-                  backgroundColor: selectedGoal?.color || '#2A363B'
-                }
-              }}
-            />
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+        Expected Annual Returns (%)
+      </Typography>
+      <Slider
+        value={formData.interestRate}
+        onChange={(e, value) => setFormData({ ...formData, interestRate: value })}
+        min={1}
+        max={30}
+        step={0.5}
+        valueLabelDisplay="auto"
+        valueLabelFormat={(value) => `${value}%`}
+        marks={[
+          { value: 1, label: '1%' },
+          { value: 10, label: '10%' },
+          { value: 20, label: '20%' },
+          { value: 30, label: '30%' },
+        ]}
+        sx={{
+          mb: 3,
+          '& .MuiSlider-thumb': {
+            backgroundColor: selectedGoal?.color || '#2A363B',
+          },
+        }}
+      />
 
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Monthly Investment (₹)
-            </Typography>
-            <TextField
-              fullWidth
-              variant="outlined"
-              name="monthlyInvestment"
-              type="number"
-              value={formData.monthlyInvestment}
-              onChange={handleChange}
-              sx={{ mb: 3 }}
-              InputProps={{
-                sx: { borderRadius: '8px' },
-                inputProps: { min: 500, step: 500 }
-              }}
-            />
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+        Monthly Investment (₹)
+      </Typography>
+      <TextField
+        fullWidth
+        variant="outlined"
+        name="monthlyInvestment"
+        type="number"
+        value={formData.monthlyInvestment}
+        onChange={handleChange}
+        sx={{ mb: 3 }}
+        InputProps={{
+          sx: { borderRadius: '8px' },
+          inputProps: { min: 500, step: 500 },
+        }}
+      />
 
-            {/* Pie Chart Section */}
-            <Box sx={{ height: '300px', mt: 4 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Investment Breakdown
-              </Typography>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    paddingAngle={5}
-                    dataKey="value"
-                    nameKey="name"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </Box>
+      {/* Pie Chart Section */}
+      <Box sx={{ height: '300px', mt: 4 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+          Investment Breakdown
+        </Typography>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={80}
+              fill="#8884d8"
+              paddingAngle={5}
+              dataKey="value"
+              nameKey="name"
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </Box>
 
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item xs={4}>
-                <Paper sx={{ p: 2, borderRadius: '8px', bgcolor: '#f5f5f5' }}>
-                  <Typography variant="body2" color="textSecondary">Invested Amount</Typography>
-                  <Typography variant="h6">₹{calculations.invested.toLocaleString()}</Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={4}>
-                <Paper sx={{ p: 2, borderRadius: '8px', bgcolor: '#f5f5f5' }}>
-                  <Typography variant="body2" color="textSecondary">Estimated Returns</Typography>
-                  <Typography variant="h6" color="success.main">
-                    ₹{calculations.returns.toLocaleString()}
-                  </Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={4}>
-                <Paper sx={{ p: 2, borderRadius: '8px', bgcolor: '#f5f5f5' }}>
-                  <Typography variant="body2" color="textSecondary">Total Value</Typography>
-                  <Typography variant="h6" color="primary.main">
-                    ₹{calculations.total.toLocaleString()}
-                  </Typography>
-                </Paper>
-              </Grid>
-            </Grid>
-          </Box>
-        </DialogContent>
-
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button 
-            onClick={handleClose}
-            sx={{ 
-              color: 'text.secondary',
-              '&:hover': { backgroundColor: 'transparent' }
-            }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSave}
-            disabled={!formData.monthlyInvestment || (selectedGoal?.name === 'Custom Goal' && !formData.goalName)}
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        <Grid item xs={4}>
+          <Paper
             sx={{
+              p: 2,
               borderRadius: '8px',
-              py: 1,
-              px: 3,
-              fontWeight: 600,
-              backgroundColor: selectedGoal?.color || '#2A363B',
-              '&:hover': {
-                backgroundColor: selectedGoal?.color || '#2A363B',
-                opacity: 0.9
-              }
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#f5f5f5',
             }}
           >
-            Save Goal
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Typography variant="body2" color="textSecondary">
+              Invested Amount
+            </Typography>
+            <Typography variant="h6">₹{calculations.invested.toLocaleString()}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={4}>
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: '8px',
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#f5f5f5',
+            }}
+          >
+            <Typography variant="body2" color="textSecondary">
+              Estimated Returns
+            </Typography>
+            <Typography variant="h6" color="success.main">
+              ₹{calculations.returns.toLocaleString()}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={4}>
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: '8px',
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#f5f5f5',
+            }}
+          >
+            <Typography variant="body2" color="textSecondary">
+              Total Value
+            </Typography>
+            <Typography variant="h6" color="primary.main">
+              ₹{calculations.total.toLocaleString()}
+            </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
+  </DialogContent>
+
+  <DialogActions sx={{ px: 3, pb: 2 }}>
+    <Button
+      onClick={handleClose}
+      sx={{
+        color: (theme) =>
+          theme.palette.mode === 'dark' ? theme.palette.text.primary : 'text.secondary',
+        '&:hover': { backgroundColor: 'transparent' },
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      variant="contained"
+      onClick={handleSave}
+      disabled={!formData.monthlyInvestment || (selectedGoal?.name === 'Custom Goal' && !formData.goalName)}
+      sx={{
+        borderRadius: '8px',
+        py: 1,
+        px: 3,
+        fontWeight: 600,
+        backgroundColor: selectedGoal?.color || '#2A363B',
+        '&:hover': {
+          backgroundColor: selectedGoal?.color || '#2A363B',
+          opacity: 0.9,
+        },
+      }}
+    >
+      Save Goal
+    </Button>
+  </DialogActions>
+</Dialog>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+      />
     </div>
   );
 };
