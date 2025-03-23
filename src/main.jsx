@@ -9,7 +9,8 @@ import NotFoundPage from "./layout/components/NotFoundPage";
 import { AuthGuard } from "./layout/components/AuthGuard";
 import AdvancedChatbot from "./layout/pages/chatbot_page/Advanced_chatbot";
 
-const user = localStorage.getItem("user");
+const user = JSON.parse(localStorage.getItem("user")); // Parse it to an object
+
 
 const router = createBrowserRouter([
   {
