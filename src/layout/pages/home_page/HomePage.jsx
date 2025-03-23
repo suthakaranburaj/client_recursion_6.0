@@ -12,7 +12,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import CloudCircleIcon from "@mui/icons-material/CloudCircle";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout, ThemeSwitcher } from "@toolpad/core/DashboardLayout";
-import Chip from "@mui/material/Chip";
+import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
 import {
   Box,
 
@@ -128,7 +128,7 @@ const NAVIGATION = [
   {
     segment: "advance-chatbot",
     title: "Advanced Chatbot",
-    icon: <EmojiEventsIcon />,
+    icon: <PrecisionManufacturingIcon />,
     path: "/advance-chatbot"
   }
 ];

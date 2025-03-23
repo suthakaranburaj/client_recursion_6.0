@@ -80,7 +80,7 @@ const AdvancedChatbot = () => {
       const data = await res.json();
       // Extract the text response from the JSON
       
-      const textResponse = data.response.json; // Assuming the JSON has a "response" field
+      const textResponse = data.response; // Assuming the JSON has a "response" field
       setResponse(textResponse);
       // Add bot response to chat
       setMessages((prev) => [...prev, { sender: 'bot', text: textResponse }]);
