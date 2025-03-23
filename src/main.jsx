@@ -8,6 +8,9 @@ import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
 import NotFoundPage from "./layout/components/NotFoundPage";
 import { AuthGuard } from "./layout/components/AuthGuard";
 import AdvancedChatbot from "./layout/pages/chatbot_page/Advanced_chatbot";
+
+const user = localStorage.getItem("user");
+
 const router = createBrowserRouter([
   {
     path: Routes.HOMEPAGE,
@@ -74,9 +77,15 @@ const router = createBrowserRouter([
           </AuthGuard>
         )
       },
-      {
-        path: Routes.ADVANCE_CHATBOT,
-        element: <AdvancedChatbot />
+        {path: Routes.ADVANCE_CHATBOT,
+        element:
+          user && user.subscription ? ( // Check subscription before rendering
+            <AuthGuard>
+              <AdvancedChatbot />
+            </AuthGuard>
+          ) : (
+            <Navigate to={Routes.DASHBOARD} replace />
+          )
       }
     ]
   },

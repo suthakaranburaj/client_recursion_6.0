@@ -11,3 +11,6 @@ export const get_goal_service = asyncHandler(async () => {
 export const add_goal_service = asyncHandler(async (payload) => {
   return await apiClient.post(`${GOAL}/add`, payload);
 });
+export const recommend_services = asyncHandler(async (payload) => {
+  return await apiClient.post(`${GOAL}/recommend`, payload);
+});
