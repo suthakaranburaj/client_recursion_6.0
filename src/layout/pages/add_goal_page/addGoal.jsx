@@ -160,7 +160,7 @@ const AddGoal = () => {
 
       <Grid container spacing={3} sx={{ mt: 2 }}>
         {goalTemplates.map((goal) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={goal.name}>
+          <Grid item xs={12} sm={12} md={6} lg={3} key={goal.name}>
             <Paper
               sx={{
                 cursor: 'pointer',

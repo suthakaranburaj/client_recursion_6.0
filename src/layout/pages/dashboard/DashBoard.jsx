@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Grid,
   Paper,
@@ -13,8 +13,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  TextField,
-  Button
+
 } from "@mui/material";
 import { 
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, 
@@ -84,6 +83,7 @@ function DashBoard() {
 
     fetchDashboardData();
     fetchGoalsData();
+    
   }, []);
 
   const handleDateRangeChange = (event) => {
@@ -127,7 +127,7 @@ function DashBoard() {
     filterDataByDateRange(dashboardData.cashFlowData)
   );
   const filteredExpenseData = filterDataByCategory(dashboardData.expenseData);
-
+console.log(dashboardData);
   return (
     <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "100vh" }}>
       <Typography
@@ -182,7 +182,7 @@ function DashBoard() {
       </Grid>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={12} lg={6}>
           <Paper
             sx={{
               p: 3,
@@ -203,8 +203,8 @@ function DashBoard() {
             </Box>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper
+        <Grid item xs={12} md={12} lg={6}>
+          <Paper  md={12}
             sx={{
               p: 3,
               borderRadius: "12px",
@@ -236,7 +236,7 @@ function DashBoard() {
       </Grid>
 
       <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={12} lg={6}>
           <Paper
             sx={{
               p: 3,
@@ -272,7 +272,7 @@ function DashBoard() {
             </ResponsiveContainer>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={12} lg={6}>
           <Paper
             sx={{
               p: 3,

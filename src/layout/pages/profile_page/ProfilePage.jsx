@@ -308,7 +308,7 @@ function ProfilePage() {
         <Divider sx={{ mb: 4 }} />
 
         <Grid container spacing={4}>
-          <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
+          <Grid item xs={12} md={12} lg={4} sx={{ textAlign: "center" }}>
             <Avatar
               src={profileData.image || "https://via.placeholder.com/150"}
               alt="Profile"
@@ -360,7 +360,7 @@ function ProfilePage() {
             )}
           </Grid>
 
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={12} lg={8}>
             <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
               <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
                 Personal Information
@@ -509,8 +509,8 @@ function ProfilePage() {
                   )}
                 </Stack>
               ) : (
-                <Stack direction="row" spacing={2}>
-                  <Button
+                <Stack  direction={{ xs: 'column',md:'column', lg: 'row' }} spacing={2}>
+                  <Button 
                     variant="contained"
                     startIcon={<EditIcon />}
                     onClick={() => setEditProfileMode(true)}
