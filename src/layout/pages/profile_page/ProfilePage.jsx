@@ -266,30 +266,83 @@ function ProfilePage() {
     }
   };
 
-  const handleProceedToPayment = async () => {
-    setIsLoading(true);
-    try {
-      const formPayload = new FormData();
-      const payload = {
-        is_paid: true
-      };
+  // Add new state variables
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [cardDetails, setCardDetails] = useState({
+    number: "",
+    expiry: "",
+    cvc: "",
+    name: ""
+  });
+  const [paymentError, setPaymentError] = useState("");
 
-      const response = await buy_subscription(payload);
-      console.log(response);
+  // Add these to your component
+  const validateCardDetails = () => {
+    if (!cardDetails.number.match(/^4242 4242 4242 4242$/)) {
+      setPaymentError("Please use 4242 4242 4242 4242 for purposes");
+      return false;
+    }
+    if (!cardDetails.expiry.match(/^(0[1-9]|1[0-2])\/\d{2}$/)) {
+      setPaymentError("Invalid expiration date (MM/YY)");
+      return false;
+    }
+    if (!cardDetails.cvc.match(/^\d{3}$/)) {
+      setPaymentError("Invalid CVC");
+      return false;
+    }
+    if (cardDetails.name.trim() === "") {
+      setPaymentError("Cardholder name is required");
+      return false;
+    }
+    return true;
+  };
+
+  const handleCardInputChange = (e) => {
+    const { name, value } = e.target;
+    setCardDetails((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleProceedToPayment = async () => {
+    if (!validateCardDetails()) return;
+
+    setPaymentProcessing(true);
+    setPaymentError("");
+
+    try {
+      // Simulate different payment processing steps
+      setCurrentStep(1);
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // Card validation
+
+      setCurrentStep(2);
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Payment processing
+
+      setCurrentStep(3);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Confirmation
+
+      // 20% chance to fail for demonstration
+      if (Math.random() < 0.2) {
+        throw new Error("Payment failed due to insufficient funds");
+      }
+
+      const response = await buy_subscription({ is_paid: true });
+
       if (response.status) {
-        const updatedUserResponse = await get_current_user_service();
-        const updatedUser = updatedUserResponse.data.data;
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        const updatedUser = await get_current_user_service();
+        localStorage.setItem("user", JSON.stringify(updatedUser.data.data));
         setProfileData((prev) => ({ ...prev, subscription: true }));
         setSubscriptionDialogOpen(false);
-        showToast("Premium subscription activated!", "success");
-      } else {
-        showToast(response.message || "Failed to activate subscription");
+        showToast("Payment successful! Premium activated.", "success");
       }
     } catch (error) {
-      showToast("Failed to activate subscription");
+      setPaymentError(error.message || "Payment failed. Please try again.");
+      showToast(error.message || "Payment failed", "error");
     } finally {
-      setIsLoading(false);
+      setPaymentProcessing(false);
+      setCurrentStep(1);
     }
   };
 
@@ -676,14 +729,85 @@ function ProfilePage() {
               </Paper>
             </Grid>
           </Grid>
+          {selectedPlan === "premium" && (
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h6" gutterBottom>
+                Payment Information
+              </Typography>
+              <Box component="form" sx={{ maxWidth: 500, mx: "auto" }}>
+                <TextField
+                  fullWidth
+                  label="Card Number"
+                  name="number"
+                  value={cardDetails.number}
+                  onChange={handleCardInputChange}
+                  placeholder="4242 4242 4242 4242"
+                  sx={{ mb: 2 }}
+                />
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      label="Expiration (MM/YY)"
+                      name="expiry"
+                      value={cardDetails.expiry}
+                      onChange={handleCardInputChange}
+                      placeholder="12/24"
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      label="CVC"
+                      name="cvc"
+                      value={cardDetails.cvc}
+                      onChange={handleCardInputChange}
+                      placeholder="123"
+                    />
+                  </Grid>
+                </Grid>
+                <TextField
+                  fullWidth
+                  label="Cardholder Name"
+                  name="name"
+                  value={cardDetails.name}
+                  onChange={handleCardInputChange}
+                  placeholder="John Doe"
+                  sx={{ mt: 2 }}
+                />
+
+                {paymentError && (
+                  <Typography color="error" sx={{ mt: 2 }}>
+                    {paymentError}
+                  </Typography>
+                )}
+
+                {paymentProcessing && (
+                  <Box sx={{ mt: 3, textAlign: "center" }}>
+                    <CircularProgress />
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      {
+                        ["Validating card...", "Processing payment...", "Confirming..."][
+                          currentStep - 1
+                        ]
+                      }
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          )}
+
           <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Button onClick={() => setSubscriptionDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => setSubscriptionDialogOpen(false)} disabled={paymentProcessing}>
+              Cancel
+            </Button>
             <Button
               variant="contained"
-              disabled={selectedPlan !== "premium"}
+              disabled={selectedPlan !== "premium" || paymentProcessing}
               onClick={handleProceedToPayment}
             >
-              Proceed to Payment
+              {paymentProcessing ? "Processing..." : "Pay ₹399/month"}
             </Button>
           </Box>
         </DialogContent>
