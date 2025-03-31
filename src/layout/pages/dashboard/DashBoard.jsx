@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Grid,
   Paper,
@@ -12,28 +12,47 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText,
-
+  ListItemText
 } from "@mui/material";
-import { 
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, 
-  ResponsiveContainer, AreaChart, Area 
-} from 'recharts';
 import {
-  Home, DirectionsCar, School, Flight, Favorite,
-  MonetizationOn, Business, AccountBalance, Receipt, 
-  AttachMoney, ShowChart, PieChart as PieChartIcon
-} from '@mui/icons-material';
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
-import { get_dashboard_stats_service } from '../../../services/statementServices/statementServices';
-import { get_goal_service } from '../../../services/goalServices/goalservices';
-import { asyncHandler } from '../../../helper/commonHelper';
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from "recharts";
+import {
+  Home,
+  DirectionsCar,
+  School,
+  Flight,
+  Favorite,
+  MonetizationOn,
+  Business,
+  AccountBalance,
+  Receipt,
+  AttachMoney,
+  ShowChart,
+  PieChart as PieChartIcon
+} from "@mui/icons-material";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+import { get_dashboard_stats_service } from "../../../services/statementServices/statementServices";
+import { get_goal_service } from "../../../services/goalServices/goalservices";
+import { asyncHandler } from "../../../helper/commonHelper";
 
-import { recommend_services } from '../../../services/goalServices/goalservices';
+import { recommend_services } from "../../../services/goalServices/goalservices";
 
 // Colors for pie chart
 // const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
+const renderCustomizedLabel = ({ value }) => `₹${value}`;
 function DashBoard() {
   const [dashboardData, setDashboardData] = useState({
     monthlyTrends: [],
@@ -83,7 +102,6 @@ function DashBoard() {
 
     fetchDashboardData();
     fetchGoalsData();
-    
   }, []);
 
   const handleDateRangeChange = (event) => {
@@ -127,7 +145,7 @@ function DashBoard() {
     filterDataByDateRange(dashboardData.cashFlowData)
   );
   const filteredExpenseData = filterDataByCategory(dashboardData.expenseData);
-console.log(dashboardData);
+  console.log(dashboardData);
   return (
     <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "100vh" }}>
       <Typography
@@ -204,7 +222,8 @@ console.log(dashboardData);
           </Paper>
         </Grid>
         <Grid item xs={12} md={12} lg={6}>
-          <Paper  md={12}
+          <Paper
+            md={12}
             sx={{
               p: 3,
               borderRadius: "12px",
@@ -254,7 +273,14 @@ console.log(dashboardData);
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip
-                  contentStyle={{ borderRadius: "8px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }}
+                  formatter={(value) => `₹${value}`}
+                  contentStyle={{
+                    backgroundColor: "#1e1e1e", // Dark background
+                    color: "#ffffff", // White text
+                    border: "1px solid rgba(255, 255, 255, 0.2)", // Light border for contrast
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)" // Darker shadow for visibility
+                  }}
                 />
                 <Bar dataKey="income" fill="url(#incomeGradient)" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="expenses" fill="url(#expenseGradient)" radius={[4, 4, 0, 0]} />
@@ -295,13 +321,14 @@ console.log(dashboardData);
                   outerRadius={90}
                   paddingAngle={5}
                   dataKey="value"
-                  label
+                  label={renderCustomizedLabel}
                 >
                   {filteredExpenseData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip
+                  formatter={(value) => `₹${value}`}
                   contentStyle={{ borderRadius: "8px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }}
                 />
               </PieChart>
