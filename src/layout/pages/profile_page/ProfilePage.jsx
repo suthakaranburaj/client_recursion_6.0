@@ -275,7 +275,7 @@ function ProfilePage() {
       };
 
       const response = await buy_subscription(payload);
-      console.log(response)
+      console.log(response);
       if (response.status) {
         const updatedUserResponse = await get_current_user_service();
         const updatedUser = updatedUserResponse.data.data;
@@ -365,7 +365,6 @@ function ProfilePage() {
               <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
                 Personal Information
               </Typography>
-
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
                   Full Name
@@ -383,7 +382,6 @@ function ProfilePage() {
                   </Typography>
                 )}
               </Box>
-
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
                   Username
@@ -401,7 +399,6 @@ function ProfilePage() {
                   </Typography>
                 )}
               </Box>
-
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
                   Email
@@ -433,7 +430,6 @@ function ProfilePage() {
                   </Typography>
                 )}
               </Box>
-
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
                   Phone Number
@@ -451,7 +447,22 @@ function ProfilePage() {
                   </Typography>
                 )}
               </Box>
-
+              // Add this to your profile component
+              {user.wallet_address && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="h6">Wallet Information</Typography>
+                  <Typography variant="body2">Connected wallet: {user.wallet_address}</Typography>
+                  {!user.email && (
+                    <Button
+                      variant="outlined"
+                      sx={{ mt: 1 }}
+                      onClick={() => setShowLinkAccount(true)}
+                    >
+                      Link Email Account
+                    </Button>
+                  )}
+                </Box>
+              )}
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
                   Subscription
@@ -468,7 +479,6 @@ function ProfilePage() {
                   </Typography>
                 )}
               </Box>
-
               {editProfileMode ? (
                 <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                   <Button variant="contained" onClick={handleSaveProfile} disabled={isLoading}>
@@ -509,8 +519,8 @@ function ProfilePage() {
                   )}
                 </Stack>
               ) : (
-                <Stack  direction={{ xs: 'column',md:'column', lg: 'row' }} spacing={2}>
-                  <Button 
+                <Stack direction={{ xs: "column", md: "column", lg: "row" }} spacing={2}>
+                  <Button
                     variant="contained"
                     startIcon={<EditIcon />}
                     onClick={() => setEditProfileMode(true)}
@@ -548,7 +558,7 @@ function ProfilePage() {
             </Paper>
           </Grid>
         </Grid>
-{/* 
+        {/* 
         <Divider sx={{ mt: 4, mb: 4 }} />
 
         <Box sx={{ textAlign: "center" }}>

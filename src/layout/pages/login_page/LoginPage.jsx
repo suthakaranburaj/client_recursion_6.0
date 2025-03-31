@@ -8,16 +8,17 @@ import {
   Box,
   Link,
   Snackbar,
-  CircularProgress,
+  CircularProgress
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   login_service,
-  get_current_user_service,
+  get_current_user_service
 } from "../../../services/authServices/authServices";
 import { get_current_statement_service } from "../../../services/statementServices/statementServices";
 import { getCookie } from "../../../helper/commonHelper";
+import Web3Login from "./Web3Login";
 
 const LoginPage = ({ onSwitchToRegister, onClose }) => {
   const [email, setEmail] = useState("");
@@ -26,6 +27,7 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
   const [toastMessage, setToastMessage] = useState("");
   const [toastSeverity, setToastSeverity] = useState("info");
   const [isLoading, setIsLoading] = useState(false);
+  const [web3LoginOpen, setWeb3LoginOpen] = useState(false);
 
   const showToast = (message, severity = "error") => {
     setToastMessage(message);
@@ -53,7 +55,7 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
     try {
       const payload = {
         email: email,
-        password: password,
+        password: password
       };
       const response = await login_service(payload);
 
@@ -105,9 +107,9 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
       const response = await get_current_user_service();
       const statementresponse = await get_current_statement_service();
       console.log(statementresponse);
-      
+
       if (response.data.data) {
-       JSON.stringify( localStorage.setItem("user", JSON.stringify(response.data.data)));
+        JSON.stringify(localStorage.setItem("user", JSON.stringify(response.data.data)));
       }
       if (statementresponse.data.data) {
         localStorage.setItem("statement", JSON.stringify(response.data.data));
@@ -131,7 +133,7 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
         zIndex: 1300,
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "center"
       }}
     >
       <Container
@@ -139,7 +141,7 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "center"
         }}
       >
         <Box
@@ -152,14 +154,11 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
             borderRadius: 2,
             width: "100%",
             backgroundColor: "background.paper",
-            position: "relative",
+            position: "relative"
           }}
         >
           {/* Close Button */}
-          <IconButton
-            onClick={onClose}
-            sx={{ position: "absolute", top: 10, right: 10 }}
-          >
+          <IconButton onClick={onClose} sx={{ position: "absolute", top: 10, right: 10 }}>
             <CloseIcon />
           </IconButton>
 
@@ -192,23 +191,21 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
               error={!password && toastSeverity === "error"}
               helperText={!password && "Password is required"}
             />
+            <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={isLoading}>
+              {isLoading ? <CircularProgress size={24} /> : "Login"}
+            </Button>
             <Button
-              type="submit"
-              variant="contained"
+              variant="outlined"
               fullWidth
               sx={{ mt: 2 }}
-              disabled={isLoading}
+              onClick={() => setWeb3LoginOpen(true)}
             >
-              {isLoading ? <CircularProgress size={24} /> : "Login"}
+              Sign in with Wallet
             </Button>
             <Box sx={{ mt: 1.5, textAlign: "center" }}>
               <Typography variant="body2">
                 Don't have an account?{" "}
-                <Link
-                  component="button"
-                  type="button"
-                  onClick={onSwitchToRegister}
-                >
+                <Link component="button" type="button" onClick={onSwitchToRegister}>
                   Register
                 </Link>
               </Typography>
@@ -234,6 +231,15 @@ const LoginPage = ({ onSwitchToRegister, onClose }) => {
           {toastMessage}
         </MuiAlert>
       </Snackbar>
+      <Web3Login
+        open={web3LoginOpen}
+        onClose={() => setWeb3LoginOpen(false)}
+        onSwitchToTraditional={() => {
+          console.log("hheeee");
+          setWeb3LoginOpen(false);
+          onSwitchToRegister();
+        }}
+      />
     </Box>
   );
 };
