@@ -52,6 +52,17 @@ import { recommend_services } from "../../../services/goalServices/goalservices"
 // Colors for pie chart
 // const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
+
+const colors = [
+  "#FF6B6B",
+  "#6B5B95",
+  "#4ECDC4",
+  "#FF9F1C",
+  "#2EC4B6",
+  "#D72638",
+  "#3A86FF",
+  "#8338EC"
+];
 const renderCustomizedLabel = ({ value }) => `₹${value}`;
 function DashBoard() {
   const [dashboardData, setDashboardData] = useState({
@@ -402,13 +413,15 @@ function DashBoard() {
             <Grid container spacing={2}>
               {goalsData.map((goal, index) => {
                 const progress = (goal.current_invested / goal.invested) * 100;
+                const backgroundColor = colors[index % colors.length]; // Assign a unique color
+
                 return (
                   <Grid item xs={12} md={6} lg={4} key={index}>
                     <Paper
                       sx={{
                         p: 2,
                         borderRadius: "12px",
-                        background: `linear-gradient(135deg, ${goal.color || "#6B5B95"} 30%, ${goal.color || "#6B5B95"}dd 100%)`,
+                        background: `linear-gradient(135deg, ${backgroundColor} 30%, ${backgroundColor}dd 100%)`,
                         color: "common.white",
                         textAlign: "left",
                         transition: "all 0.3s ease",

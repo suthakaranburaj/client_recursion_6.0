@@ -8,9 +8,11 @@ import MailIcon from "@mui/icons-material/Mail";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
+import Paper from "@mui/material/Paper";
+import Divider from "@mui/material/Divider";
 import {
   get_current_notification_service,
-  update_notification_service,
+  update_notification_service
 } from "../../../../services/notificationServices/notificationServices";
 
 const NotificationBar = () => {
@@ -19,7 +21,6 @@ const NotificationBar = () => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
 
-  // Fetch notifications on component mount
   React.useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -36,31 +37,22 @@ const NotificationBar = () => {
         setLoading(false);
       }
     };
-
     fetchNotifications();
   }, []);
 
-  // Handle opening/closing the popover
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = async () => {
     setAnchorEl(null);
-
-    // Mark all notifications as read
     const updatedNotifications = notifications.map((notification) => ({
       ...notification,
-      is_read: true, // Update the `is_read` attribute
+      is_read: true
     }));
-
-    // Update the state to reflect read notifications
     setNotifications(updatedNotifications);
-
-    // Send a POST request to update notifications when the popover is closed
     try {
       await update_notification_service({ notifications: updatedNotifications });
-      console.log("Notifications updated successfully");
     } catch (err) {
       console.error("Error updating notifications:", err);
     }
@@ -68,34 +60,16 @@ const NotificationBar = () => {
 
   const open = Boolean(anchorEl);
   const id = open ? "notification-popover" : undefined;
-
-  // Count unread notifications
   const unreadCount = notifications.filter((notification) => !notification.is_read).length;
 
   return (
-    <Stack spacing={2} direction="row" alignItems="center" sx={{ mr: 1 }}>
-      <Tooltip
-        title="Notifications"
-        PopperProps={{
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, 10], // [horizontal, vertical] offset
-              },
-            },
-          ],
-        }}
-      >
-        <Badge badgeContent={unreadCount} color="primary">
-          <IconButton
-            aria-describedby={id}
-            color="inherit"
-            onClick={open ? handleClose : handleClick}
-          >
-            <MailIcon fontSize="small" />
-          </IconButton>
-        </Badge>
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ mr: 1 }}>
+      <Tooltip title="Notifications">
+        <IconButton aria-describedby={id} color="primary" onClick={handleClick}>
+          <Badge badgeContent={unreadCount} color="error">
+            <MailIcon fontSize="medium" />
+          </Badge>
+        </IconButton>
       </Tooltip>
 
       <Popover
@@ -103,68 +77,45 @@ const NotificationBar = () => {
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Box sx={{ p: 2, width: 300 }}>
-          <Typography variant="h6" gutterBottom>
+        <Paper sx={{ p: 2, width: 350, borderRadius: 2, boxShadow: 3 }}>
+          <Typography variant="h6" color="primary" gutterBottom>
             Notifications
           </Typography>
+          <Divider sx={{ mb: 2 }} />
 
           {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
               <CircularProgress size={24} />
             </Box>
           ) : error ? (
-            <Typography variant="body1" color="error">
-              {error}
-            </Typography>
+            <Typography color="error">{error}</Typography>
           ) : notifications.length === 0 ? (
-            <Typography variant="body1">No new notifications.</Typography>
+            <Typography color="textSecondary">No new notifications.</Typography>
           ) : (
             notifications.map((notification, index) => (
-              <Box
+              <Paper
                 key={index}
+                elevation={2}
                 sx={{
-                  p: 1,
+                  p: 1.5,
                   mb: 1,
-                  borderRadius: "4px",
-                  backgroundColor: notification.is_read ? "background.paper" : "action.hover",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  position: "relative",
+                  borderRadius: 2,
+                  backgroundColor: notification.is_read ? "background.default" : "action.hover"
                 }}
               >
-                {!notification.is_read && (
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      backgroundColor: "primary.main",
-                      color: "common.white",
-                      borderRadius: "4px",
-                      px: 1,
-                      fontSize: "0.75rem",
-                    }}
-                  >
-                    New
-                  </Box>
-                )}
-                <Typography variant="body1">{notification.message}</Typography>
+                <Typography variant="body1" fontWeight={notification.is_read ? "normal" : "bold"}>
+                  {notification.message}
+                </Typography>
                 <Typography variant="caption" color="textSecondary">
                   {new Date(notification.createdAt).toLocaleString()}
                 </Typography>
-              </Box>
+              </Paper>
             ))
           )}
-        </Box>
+        </Paper>
       </Popover>
     </Stack>
   );
