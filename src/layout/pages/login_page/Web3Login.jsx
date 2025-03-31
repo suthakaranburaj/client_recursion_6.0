@@ -9,8 +9,13 @@ import {
   TextField,
   Typography,
   CircularProgress,
-  Box
+  Box,
+  Paper,
+  Divider,
+  IconButton
 } from "@mui/material";
+import { AccountBalanceWallet, Fingerprint, Link, Close } from "@mui/icons-material";
+// ... keep existing imports ...
 import {
   initiateWeb3LoginService,
   verifyWeb3AuthService,
@@ -129,83 +134,143 @@ const Web3Login = ({ open, onClose, onSwitchToTraditional }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>
-        {step === 1 && "Connect Wallet"}
-        {step === 2 && "Sign Message"}
-        {step === 3 && "Link to Existing Account"}
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box display="flex" alignItems="center">
+          {step === 1 && <AccountBalanceWallet sx={{ mr: 1 }} />}
+          {step === 2 && <Fingerprint sx={{ mr: 1 }} />}
+          {step === 3 && <Link sx={{ mr: 1 }} />}
+          {step === 1 && "Connect Wallet"}
+          {step === 2 && "Verify Ownership"}
+          {step === 3 && "Link Account"}
+        </Box>
+        <IconButton onClick={onClose} size="small">
+          <Close />
+        </IconButton>
       </DialogTitle>
+
       <DialogContent>
         {error && (
-          <Typography color="error" paragraph>
-            {error}
-          </Typography>
+          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: "error.main", color: "white" }}>
+            <Typography variant="body2">{error}</Typography>
+          </Paper>
         )}
 
         {step === 1 && (
-          <>
-            <Typography paragraph>
-              Connect your Ethereum wallet to sign in or create an account.
+          <Box textAlign="center" py={3}>
+            <AccountBalanceWallet sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Connect Your Wallet
             </Typography>
-            <Box display="flex" justifyContent="center" my={2}>
-              <Button variant="contained" onClick={connectWallet} disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : "Connect Wallet"}
-              </Button>
-            </Box>
-            <Typography align="center">
-              or <Button onClick={onSwitchToTraditional}>use traditional login</Button>
+            <Typography variant="body2" color="textSecondary" paragraph>
+              Secure login using your Ethereum wallet. We support MetaMask, Coinbase Wallet, and
+              more.
             </Typography>
-          </>
+
+            <Button
+              variant="contained"
+              size="large"
+              onClick={connectWallet}
+              disabled={loading}
+              sx={{ mt: 3, mb: 2, minWidth: 200 }}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+            >
+              {loading ? "Connecting..." : "Connect Wallet"}
+            </Button>
+
+            <Divider sx={{ my: 3 }}>OR</Divider>
+
+            <Button variant="outlined" color="primary" onClick={onSwitchToTraditional}>
+              Use Email & Password
+            </Button>
+          </Box>
         )}
 
         {step === 2 && (
-          <>
-            <Typography paragraph>
-              Please sign the following message in your wallet to authenticate:
+          <Box py={2}>
+            <Typography variant="h6" gutterBottom align="center">
+              Signature Required
             </Typography>
-            <Typography variant="body2" color="textSecondary" paragraph>
-              {message}
+            <Typography variant="body2" color="textSecondary" align="center" paragraph>
+              Please sign the message below in your wallet to verify ownership
             </Typography>
-            <Box display="flex" justifyContent="center" my={2}>
-              <Button variant="contained" onClick={signMessage} disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : "Sign Message"}
+
+            <Paper variant="outlined" sx={{ p: 2, my: 3, bgcolor: "background.paper" }}>
+              <Typography variant="caption" component="div" color="textSecondary">
+                Verification Message:
+              </Typography>
+              <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: "break-word" }}>
+                {message}
+              </Typography>
+            </Paper>
+
+            <Box textAlign="center">
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={signMessage}
+                disabled={loading}
+                size="large"
+                sx={{ minWidth: 200 }}
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+              >
+                {loading ? "Verifying..." : "Sign Message"}
               </Button>
             </Box>
-          </>
+          </Box>
         )}
 
         {step === 3 && (
-          <>
-            <Typography paragraph>Link your wallet to an existing account:</Typography>
+          <Box py={2}>
+            <Typography variant="h6" gutterBottom align="center">
+              Link to Existing Account
+            </Typography>
+            <Typography variant="body2" color="textSecondary" align="center" paragraph>
+              Connect your wallet to an existing account by verifying your credentials
+            </Typography>
+
             <TextField
-              label="Email"
               fullWidth
+              label="Email Address"
+              variant="outlined"
               margin="normal"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              sx={{ mt: 3 }}
             />
+
             <TextField
+              fullWidth
               label="Password"
               type="password"
-              fullWidth
+              variant="outlined"
               margin="normal"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              sx={{ mb: 3 }}
             />
-            <Box display="flex" justifyContent="center" my={2}>
+
+            <Box textAlign="center">
               <Button
                 variant="contained"
+                color="primary"
                 onClick={linkAccounts}
                 disabled={loading || !email || !password}
+                size="large"
+                sx={{ minWidth: 200 }}
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                {loading ? <CircularProgress size={24} /> : "Link Accounts"}
+                {loading ? "Linking..." : "Link Accounts"}
               </Button>
             </Box>
-          </>
+          </Box>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+
+      <DialogActions sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
+        <Button onClick={onClose} color="inherit">
+          Close
+        </Button>
       </DialogActions>
     </Dialog>
   );
