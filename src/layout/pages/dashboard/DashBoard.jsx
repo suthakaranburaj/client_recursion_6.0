@@ -401,7 +401,7 @@ function DashBoard() {
             </Box>
             <Grid container spacing={2}>
               {goalsData.map((goal, index) => {
-                const progress = (goal.invested / goal.target) * 100;
+                const progress = (goal.current_invested / goal.invested) * 100;
                 return (
                   <Grid item xs={12} md={6} lg={4} key={index}>
                     <Paper
@@ -467,7 +467,7 @@ function DashBoard() {
                             Target
                           </Typography>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            ₹{goal.target.toLocaleString()}
+                            ₹{goal.invested.toLocaleString()}
                           </Typography>
                         </Grid>
                         <Grid item xs={6}>
@@ -475,7 +475,7 @@ function DashBoard() {
                             Invested
                           </Typography>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            ₹{goal.invested.toLocaleString()}
+                            ₹{goal.current_invested.toLocaleString()}
                           </Typography>
                         </Grid>
                       </Grid>
