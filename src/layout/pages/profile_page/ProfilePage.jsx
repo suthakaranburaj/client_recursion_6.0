@@ -500,7 +500,7 @@ function ProfilePage() {
                   </Typography>
                 )}
               </Box>
-              // Add this to your profile component
+              {/* // Add this to your profile component */}
               {user.wallet_address && (
                 <Box sx={{ mt: 3 }}>
                   <Typography variant="h6">Wallet Information</Typography>
