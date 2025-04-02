@@ -807,7 +807,7 @@ function ProfilePage() {
               disabled={selectedPlan !== "premium" || paymentProcessing}
               onClick={handleProceedToPayment}
             >
-              {paymentProcessing ? "Processing..." : "Pay ₹399/month"}
+              {paymentProcessing ? "Processing..." : "Pay 49/month"}
             </Button>
           </Box>
         </DialogContent>
