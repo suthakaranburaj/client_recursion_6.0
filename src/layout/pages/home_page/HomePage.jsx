@@ -9,6 +9,7 @@ import Divider from "@mui/material/Divider";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import HistoryIcon from '@mui/icons-material/History';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CloudCircleIcon from "@mui/icons-material/CloudCircle";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout, ThemeSwitcher } from "@toolpad/core/DashboardLayout";
@@ -116,7 +117,7 @@ const NAVIGATION = [
   {
     segment: "pdf",
     title: "Statements",
-    icon: <HistoryIcon />,
+    icon: <ReceiptLongIcon />,
     path: "/pdf"
   },
   {
