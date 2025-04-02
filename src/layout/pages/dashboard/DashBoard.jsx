@@ -412,7 +412,8 @@ function DashBoard() {
             </Box>
             <Grid container spacing={2}>
               {goalsData.map((goal, index) => {
-                const progress = (goal.current_invested / goal.invested) * 100;
+                const progress =
+                  (goal.current_invested == null ? 0 : goal.current_invested / goal.invested) * 100;
                 const backgroundColor = colors[index % colors.length]; // Assign a unique color
 
                 return (
@@ -488,7 +489,7 @@ function DashBoard() {
                             Invested
                           </Typography>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            ₹{goal.current_invested.toLocaleString()}
+                            ₹{(goal.current_invested ?? 0).toLocaleString()}
                           </Typography>
                         </Grid>
                       </Grid>
